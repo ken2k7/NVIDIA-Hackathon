@@ -13,14 +13,27 @@
 
 ## 1. Executive Summary & Problem Statement
 
-In municipal civil engineering, uncoordinated street works represent one of the costliest and most disruptive public sector failures:
-* A city repaves a major corridor; three months later, the water authority excavates the asphalt to replace mains; six months later, telecom providers tear it open again for fiber-optic cabling.
-* Legacy construction management suites (such as Oracle Primavera P6 and Microsoft Project) operate in departmental silos, rely on brittle manual Gantt adjustments, and cannot dynamically negotiate cross-utility coordination.
-* Traditional pure LLM solutions fail in this domain because language models cannot reliably solve combinatorial scheduling or guarantee physical constraint satisfaction (often hallucinating impossible timelines or safety code violations).
+Uncoordinated street works are one of the most visible and costly failures in public infrastructure, and the waste starts **inside a single owner's own portfolio** before it ever involves outside parties:
 
-**InfraSync** implements a **Neuro-Symbolic architecture**:
-1. **Google OR-Tools (CP-SAT)** acts as the deterministic mathematical engine, enforcing hard physical precedence, crew capacities, traffic detour thresholds, and "Dig Once" co-trenching synergies with guaranteed zero hallucinations.
-2. **NVIDIA Nemotron-3 (via Nebius Token Factory)** serves as the cognitive reasoning copilot, translating fuzzy real-world disruptions (e.g., weather events, budget shifts, emergency incidents) into solver constraints and providing transparent, defensible engineering justifications for executive stakeholders.
+* **Within one owner.** A city's roads, water, drainage and sewer departments plan in separate systems and separate budget cycles. The city repaves a corridor, then months later excavates the same asphalt to replace a water main, then opens it again for drainage — all projects it *already owns*, simply never sequenced together.
+* **Across owners.** The same street is later re-opened by a private telecom for fiber, because utility and municipal plans are never compared against each other.
+* **Tooling gap.** Legacy suites (Oracle Primavera P6, Microsoft Project) optimize *one project at a time* and operate in departmental silos. Existing "Dig Once" portals (e.g., Michigan's statewide portal, London's Infrastructure Mapping Application) only *flag* geographic overlaps on a map — they do not optimize a joint schedule or quantify the trade-off.
+* **Why not a pure LLM.** Language models cannot reliably solve combinatorial scheduling or guarantee physical constraint satisfaction; they hallucinate impossible timelines and code violations. The math must be deterministic.
+
+### What InfraSync actually does
+
+InfraSync is a **right-of-way coordination and decision-support tool** for the party that plans the work — **initially a single owner sequencing its own portfolio** (a city public works office, a large utility, or a corridor-design consultancy). It:
+
+1. **Ingests** the separate plans that owner already holds and finds, for each pair of work packages, where sharing a single trench is **spatially co-located, temporally reachable within available slack, engineering-compatible** (utility separation codes permit it), and **net-beneficial** after the cost of shifting timing.
+2. **Optimizes** the joint sequence deterministically with Google OR-Tools (CP-SAT), honoring hard constraints including precedence, crew capacity, parallel-corridor traffic limits, and legal **pavement-cut moratoria**.
+3. **Explains and re-plans** in plain English via NVIDIA Nemotron-3, so a non-technical decision-maker can see *why* a sequence was chosen and what a disruption costs.
+
+**Positioning — what it is not.** InfraSync does **not** force independent institutions to cooperate. For a single owner, no coordination between parties is required at all. For cross-owner cases, it surfaces and *quantifies* the opportunities where coordination already pays each side (the city avoids re-excavation and political cost; a utility avoids a multi-year moratorium lockout or shares trench cost), and leaves the decision to humans. Organizational agreements, procurement, and cost-sharing contracts are explicitly out of scope — InfraSync informs those decisions, it does not execute them.
+
+### Architecture: Neuro-Symbolic
+
+1. **Google OR-Tools (CP-SAT)** is the deterministic engine — hard precedence, crew capacities, traffic thresholds, moratoria, and "Dig Once" synergies, with zero hallucination.
+2. **NVIDIA Nemotron-3 (via Nebius Token Factory)** is the reasoning copilot — translating fuzzy real-world events into solver constraints and producing transparent, defensible justifications for stakeholders.
 
 ---
 
@@ -61,9 +74,9 @@ flowchart TD
 
 ## 3. Core Capabilities
 
-### A. "Dig Once" Co-Trenching Synchronization
-* Automatically detects co-located subsurface utilities (e.g., water mains and fiber-optic ducts along the same right-of-way).
-* Synchronizes excavation windows to share single trench openings, reducing street closure duration by up to 40% and eliminating duplicate excavation costs.
+### A. "Dig Once" Opportunity Detection & Co-Trenching
+* Scans an owner's own portfolio (and, optionally, shared cross-owner plans) for work-package pairs that are spatially co-located, temporally reachable within schedule slack, engineering-compatible under separation codes, and net-beneficial after re-timing.
+* Synchronizes excavation windows so a street is opened **once** instead of repeatedly — cutting both direct cost (one trench, one repave) and street-closure days. The savings are surfaced and quantified per opportunity so a human can act on them; the tool recommends, it does not compel.
 
 ### B. Provable Mathematical Constraint Satisfaction
 * **Precedence Enforcement**: Guarantees deep utility installation (drainage/water) precedes sub-base preparation and final asphalt wearing course.
@@ -197,12 +210,15 @@ Where:
 
 ## 8. Demonstration Scenarios
 
+**Demo setup — a single owner coordinating its own portfolio.** One city holds four separately-planned projects on a district: a road resurfacing, a drainage upgrade, a water-main replacement, and a fiber conduit. Same owner, four schedules, nothing sequenced across them. No cross-institution agreement is required — this is the city coordinating with itself, which is where the demo lives and where adoption is easiest.
+
 | Scenario | Trigger | Optimizer Response | AI Copilot Action |
 |---|---|---|---|
-| **Baseline Optimization** | Initial Load | Enforces precedence, resolves crew limits, co-trenches Water & Fiber | Outlines schedule, highlights $20k+ savings |
-| **Severe Weather Event** | "Simulate 3-Day Monsoon Delay" | Pauses earthworks; pushes dependent paving while advancing indoor/dry tasks | Explains minimal makespan impact and revised critical path |
-| **Emergency Infrastructure Incident** | "Water Main Burst on Broadway" | Injects high-priority repair, pre-empts lower priority cabling | Explains resource reallocation and detour strategy |
-| **Fiscal Constraint Shift** | "Apply 15% Budget Cap" | Re-sequences non-critical telecommunications to Phase 2 | Quantifies capital deferral without delaying core road opening |
+| **Baseline Optimization** | Initial Load | Enforces precedence and crew limits; co-trenches water & fiber by shifting fiber earlier; schedules paving last to respect the pavement-cut moratorium | Outlines the joint schedule; quantifies trench cost and closure-days saved vs. the uncoordinated baseline |
+| **Pavement Moratorium Conflict** | "Fiber crew wants to dig Main St after resurfacing" | Blocks the cut (moratorium active for M years post-repave); forces fiber into the pre-repave window or defers it | Explains the legal lock-out and why aligning *before* the repave is the only non-penalized option |
+| **Severe Weather Event** | "Simulate 3-Day Monsoon Delay" | Pauses deep earthworks; pushes dependent paving while advancing dry-weather tasks | Explains makespan impact and the revised critical path |
+| **Emergency Infrastructure Incident** | "Water Main Burst on Broadway" | Injects a high-priority repair; pre-empts lower-priority cabling within crew limits | Explains resource reallocation and detour strategy |
+| **Fiscal Constraint Shift** | "Apply 15% Budget Cap" | Treats the cap as a hard constraint; re-sequences non-critical telecom to Phase 2 | Quantifies capital deferral without delaying the core road opening |
 
 ---
 
