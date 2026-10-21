@@ -30,6 +30,19 @@ InfraSync is a **right-of-way coordination and decision-support tool** for the p
 
 **Positioning — what it is not.** InfraSync does **not** force independent institutions to cooperate. For a single owner, no coordination between parties is required at all. For cross-owner cases, it surfaces and *quantifies* the opportunities where coordination already pays each side (the city avoids re-excavation and political cost; a utility avoids a multi-year moratorium lockout or shares trench cost), and leaves the decision to humans. Organizational agreements, procurement, and cost-sharing contracts are explicitly out of scope — InfraSync informs those decisions, it does not execute them.
 
+### Where it sits in the project lifecycle
+
+InfraSync operates **upstream of the tender**, during capital planning — the point of maximum scheduling slack, before dates, scope and price are locked by contract.
+
+```text
+Capital Improvement Plan  →  [ InfraSync packaging & sequencing ]  →  Tender / Bid  →  Award  →  Construction
+   (separate project plans)      groups projects into coordinated         (coordinated       (built coordinated
+                                 bid packages; respects moratoria,          scope goes          by design)
+                                 funding windows & separation codes)        to market)
+```
+
+Its primary deliverable is a **pre-procurement packaging recommendation** — which projects to bundle into a single tender and in what sequence — not a post-award construction schedule. Coordinating *before* bidding keeps the tool clear of re-opening awarded contracts: the coordinated bundle simply becomes the scope that goes to market. Bundle size is a recommendation, not a mandate — a human still weighs packaging against bidder competition and funding-cycle alignment.
+
 ### Architecture: Neuro-Symbolic
 
 1. **Google OR-Tools (CP-SAT)** is the deterministic engine — hard precedence, crew capacities, traffic thresholds, moratoria, and "Dig Once" synergies, with zero hallucination.
