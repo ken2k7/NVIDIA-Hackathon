@@ -16,3 +16,7 @@ dist/
 # ─── Secrets & local environment (NEVER commit real keys) ───
 .env
 .env.local
+
+# ─── Local research & learning notes (kept off the shared repo) ───
+TRENDS_RESEARCH.md
+learn/
