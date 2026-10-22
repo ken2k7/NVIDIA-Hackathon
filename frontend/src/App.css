@@ -1,0 +1,20 @@
+/* Minimal styling for the scaffold. We'll grow this later. */
+.app {
+  max-width: 640px;
+  margin: 48px auto;
+  padding: 0 16px;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.app h1 {
+  margin-bottom: 4px;
+}
+
+.app ul {
+  padding-left: 20px;
+}
+
+.app li {
+  margin: 6px 0;
+}
