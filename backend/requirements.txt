@@ -1,0 +1,5 @@
+# Backend Python dependencies. Install with:  pip install -r requirements.txt
+fastapi>=0.115            # the web framework that defines our API endpoints
+uvicorn[standard]>=0.30   # the server that actually runs the FastAPI app
+pydantic>=2.7             # validates/serialises our data shapes (Segment, WorkPackage, ...)
+pydantic-settings>=2.3    # reads configuration (like API keys) from a .env file
