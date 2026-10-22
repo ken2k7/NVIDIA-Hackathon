@@ -1,0 +1,18 @@
+# ─── Operating system / editor junk ───
+.DS_Store
+.idea/
+.vscode/
+
+# ─── Python ───
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ─── Node / frontend ───
+node_modules/
+dist/
+
+# ─── Secrets & local environment (NEVER commit real keys) ───
+.env
+.env.local
