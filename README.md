@@ -1,13 +1,15 @@
-# InfraSync: Autonomous Civil Infrastructure Sequencer & Adaptive Planning Copilot
+# InfraSync: Civil Infrastructure Sequencing & Adaptive Planning Copilot
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python: 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python: 3.9+](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20TypeScript-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![React](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Optimization: Google OR-Tools](https://img.shields.io/badge/Solver-Google%20OR--Tools%20CP--SAT-EA4335?logo=google&logoColor=white)](https://developers.google.com/optimization)
 [![AI: NVIDIA Nemotron](https://img.shields.io/badge/Inference-Nebius%20Token%20Factory-76B900?logo=nvidia&logoColor=white)](https://tokenfactory.nebius.com)
 
-> **Autonomous multi-utility construction sequencing and real-time disruption adaptation powered by Constraint Programming (Google OR-Tools) and Agentic Reasoning (NVIDIA Nemotron via Nebius Token Factory).**
+> **Multi-utility construction sequencing and disruption adaptation: a deterministic optimizer (Google OR-Tools) proposes the plan, an AI copilot (NVIDIA Nemotron via Nebius Token Factory) translates and explains it, and a human approves.**
+
+> **🚧 Project status (2026-10-23): early build.** The backend (FastAPI) and frontend (React + Vite) **scaffolds are in place** and communicate over a stub `/project` endpoint. The optimizer, AI copilot, map, and timeline are **planned next** — see [`docs/FeatureSet.md`](docs/FeatureSet.md) for the full feature set, implementation plan, and open decisions. Sections below describe the **target** system; Repository Structure (§6) marks what exists today vs. what is planned.
 
 ---
 
@@ -52,17 +54,19 @@ Its primary deliverable is a **pre-procurement packaging recommendation** — wh
 
 ## 2. System Architecture
 
+> This diagram shows the **target** architecture. Today, only the API box (FastAPI + Pydantic) and the frontend shell exist; the optimizer, agent, and visual components are planned (see §6).
+
 ```mermaid
 flowchart TD
     subgraph UI ["Frontend (React + TypeScript)"]
-        GIS["Interactive GIS Map\n(Leaflet / GeoJSON)"]
-        Gantt["Gantt Schedule & Timeline"]
-        Scenarios["Scenario Disruption Controls\n(Rain, Incident, Budget)"]
+        GIS["Interactive GIS Map\n(Leaflet)"]
+        Gantt["Schedule Timeline (Gantt)"]
+        Scenarios["Scenario Disruption Controls\n(Weather, Incident, Budget)"]
     end
 
     subgraph API ["Backend API (FastAPI)"]
-        Router["REST Endpoints\n(/api/network, /api/schedule, /api/adapt)"]
-        Validator["Pydantic Data Schemas\n(Work Orders, Crews, Streets)"]
+        Router["REST Endpoints\n(/project, /plan, /replan, /plans/{id}/approve)"]
+        Validator["Pydantic Data Schemas\n(Work Packages, Crews, Segments)"]
     end
 
     subgraph Intelligence ["Neuro-Symbolic Planning Engine"]
@@ -106,6 +110,8 @@ flowchart TD
 
 ## 4. Mathematical Formulation
 
+> ⚠️ **Under active refinement.** This is the target formulation. Several details are still being finalized before it drives the solver — notably linking completion to start+duration, treating the budget as a hard constraint, tying `IsClosed` to actual tasks, and gating the co-trench synergy on a real co-trench decision variable. See the research backlog in [`docs/FeatureSet.md`](docs/FeatureSet.md) §8.
+
 ### Objective Function
 The optimizer minimizes a multi-objective loss function $Z$:
 
@@ -127,50 +133,56 @@ Where:
 
 ## 5. Technology Stack
 
-| Layer | Component | Technology | Rationale |
+Legend: ✅ in use today · 🔲 planned.
+
+| Layer | Component | Technology | Status |
 |---|---|---|---|
-| **Frontend** | Application UI | React 18, TypeScript, Vite | Strongly-typed, reactive interface with high performance |
-| **Frontend** | GIS Visualization | Leaflet / React-Leaflet | Lightweight, responsive vector mapping of street networks |
-| **Backend** | API Server | Python 3.11, FastAPI, Pydantic | High-speed asynchronous Python framework with automatic schema validation |
-| **Intelligence** | Combinatorial Solver | Google OR-Tools (CP-SAT) | C++-backed constraint solver with proven deterministic optimality |
-| **Intelligence** | Reasoning Agent | NVIDIA Nemotron-3 Super / Nano | Large context, tool-calling reasoning hosted on Nebius Token Factory |
-| **Geospatial** | Spatial Datasets | GeoJSON / Shapely | Standardized spatial coordinate representations with zero DB overhead |
+| **Frontend** | Application UI | React 19, TypeScript, Vite | ✅ scaffolded |
+| **Frontend** | GIS Visualization | Leaflet / React-Leaflet | 🔲 planned |
+| **Frontend** | Schedule Timeline | Custom React components | 🔲 planned |
+| **Backend** | API Server | Python 3.9 (3.11+ target), FastAPI, Pydantic v2 | ✅ scaffolded |
+| **Intelligence** | Combinatorial Solver | Google OR-Tools (CP-SAT) | 🔲 planned — the deterministic core |
+| **Intelligence** | Reasoning Agent | NVIDIA Nemotron-3 (Nebius Token Factory), via the OpenAI-compatible SDK | 🔲 planned |
+| **Data** | Sample dataset | Synthetic district as JSON (in-memory; no DB) | 🔲 planned |
+| **Web grounding** | Cited rules | Tavily | 🔲 stretch / optional |
 
 ---
 
 ## 6. Repository Structure
 
+Legend: ✅ exists today · 🔲 planned (see [`docs/FeatureSet.md`](docs/FeatureSet.md)).
+
 ```text
-├── .agents/                      # Workflow rules and customization guidelines
-├── backend/
-│   ├── app/
-│   │   ├── api/                  # FastAPI router endpoints
-│   │   ├── core/                 # Configuration and environment settings
-│   │   ├── models/               # Pydantic schemas (Task, Street, Schedule)
-│   │   ├── services/
-│   │   │   ├── optimizer.py      # Google OR-Tools CP-SAT formulation
-│   │   │   ├── agent.py          # NVIDIA Nemotron client via Nebius Token Factory
-│   │   │   └── scenario.py       # Disruption simulation engine
-│   │   └── main.py               # Application entry point
-│   ├── data/
-│   │   └── city_network.geojson  # Municipal street coordinates and utility tasks
-│   └── requirements.txt          # Backend dependencies
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── MapView.tsx       # Leaflet GIS vector map with utility layers
-│   │   │   ├── GanttChart.tsx    # Interactive schedule timeline
-│   │   │   ├── ScenarioPanel.tsx # Disruption simulation triggers
-│   │   │   └── ChatDrawer.tsx    # AI engineering explainer interface
-│   │   ├── App.tsx               # Main layout container
-│   │   └── main.tsx              # React mounting root
-│   ├── package.json
-│   └── vite.config.ts
+├── .gitignore                        ✅
+├── README.md                         ✅ this file
+├── HACKATHON_RESEARCH.md             ✅ event rules, judging criteria (research notes)
+├── LICENSE                           🔲 MIT — required for submission, not yet added
 ├── docs/
-│   └── PROJECT_SPECIFICATION.md  # Detailed engineering and algorithm specifications
-├── HACKATHON_RESEARCH.md         # Event constraints, judging criteria, and rules
-├── LICENSE                       # MIT Open Source License
-└── README.md                     # Project documentation
+│   └── FeatureSet.md                 ✅ feature set, implementation plan, open decisions
+├── backend/
+│   ├── requirements.txt              ✅ fastapi, uvicorn, pydantic, pydantic-settings
+│   ├── .env.example                  ✅ NEBIUS_API_KEY placeholder
+│   ├── app/
+│   │   ├── main.py                   ✅ FastAPI app: /health, /project (stub)
+│   │   ├── core/config.py            ✅ settings + CORS origins
+│   │   ├── models/schemas.py         ✅ Pydantic: Segment, WorkPackage, Project (minimal)
+│   │   └── services/                 🔲 (planned)
+│   │       ├── optimizer.py          🔲 OR-Tools CP-SAT scheduler
+│   │       ├── agent.py              🔲 Nemotron client (parse + explain)
+│   │       └── dataset.py            🔲 loads the synthetic district
+│   └── data/district.json            🔲 synthetic sample district
+└── frontend/
+    ├── index.html                    ✅
+    ├── package.json, vite.config.ts  ✅
+    └── src/
+        ├── main.tsx                  ✅ React entry
+        ├── App.tsx                   ✅ fetches /project, lists work packages
+        ├── api.ts                    ✅ backend client
+        ├── types.ts                  ✅ TS mirror of backend schemas
+        └── components/
+            ├── MapView.tsx           🔲 Leaflet map of the street network
+            ├── Timeline.tsx          🔲 schedule / Gantt view
+            └── ScenarioPanel.tsx     🔲 disruption triggers + explanation
 ```
 
 ---
@@ -178,9 +190,9 @@ Where:
 ## 7. Getting Started
 
 ### Prerequisites
-* Python 3.11+
+* Python 3.9+ (3.11+ recommended once the toolchain requires it)
 * Node.js 18+ and `npm`
-* Nebius Token Factory API Key (`NEBIUS_API_KEY`)
+* Nebius Token Factory API Key (`NEBIUS_API_KEY`) — **not needed yet** for the current scaffold; required once the AI copilot (F7/F8) lands
 
 ### Backend Setup
 1. Navigate to the backend directory and set up a virtual environment:
@@ -208,16 +220,20 @@ Where:
    Interactive OpenAPI documentation will be accessible at `http://localhost:8000/docs`.
 
 ### Frontend Setup
-1. Navigate to the frontend directory:
+1. Navigate to the frontend directory and install dependencies:
    ```bash
    cd frontend
    npm install
    ```
-2. Start the Vite development server:
+2. Point the frontend at the backend (create `frontend/.env.local`):
+   ```bash
+   echo "VITE_API_URL=http://localhost:8000" > .env.local
+   ```
+3. Start the Vite development server:
    ```bash
    npm run dev
    ```
-3. Open `http://localhost:5173` in your browser.
+4. Open `http://localhost:5173` in your browser. With the backend running, you should see the sample work packages loaded from `/project`.
 
 ---
 
