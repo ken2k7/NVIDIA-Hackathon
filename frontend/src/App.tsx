@@ -1,43 +1,93 @@
-import { useEffect, useState } from "react";
-import { fetchProject } from "./api";
-import type { Project } from "./types";
+import React from "react";
+import { Header } from "./components/Header";
+import { MapRegion } from "./components/MapRegion";
+import { TimelineRegion } from "./components/TimelineRegion";
+import { ScenarioRegion } from "./components/ScenarioRegion";
+import { useProject } from "./hooks/useProject";
 import "./App.css";
 
-export default function App() {
-  // Three pieces of memory (state): the data, whether we're still loading,
-  // and any error text. Each starts in its "nothing yet" value.
-  const [project, setProject] = useState<Project | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function App(): React.ReactElement {
+  const {
+    project,
+    plan,
+    replan,
+    isLoading,
+    isActing,
+    error,
+    actionError,
+    refreshProject,
+    triggerReplan,
+    approveProposal,
+    rejectProposal,
+    clearActionError,
+  } = useProject();
 
-  // Run once, right after the screen first appears: go fetch the project.
-  useEffect(() => {
-    fetchProject()
-      .then((data) => setProject(data)) // success → store the data
-      .catch((err) => setError(String(err))) // failure → store the message
-      .finally(() => setIsLoading(false)); // either way → stop "loading"
-  }, []); // empty [] = only run on first appearance
+  // Full-page Loading State
+  if (isLoading && !project) {
+    return (
+      <div className="app-loading-screen" role="status" aria-live="polite">
+        <div className="loading-spinner"></div>
+        <h2>Loading InfraSync…</h2>
+        <p>Connecting to backend Right-of-Way service</p>
+      </div>
+    );
+  }
 
-  // Three different screens depending on what state we're in.
-  if (isLoading) return <p className="app">Loading…</p>;
-  if (error) return <p className="app">Could not reach the backend: {error}</p>;
-  if (!project) return null;
+  // Full-page Error State
+  if (error && !project) {
+    return (
+      <div className="app-error-screen" role="alert">
+        <div className="error-icon">⚠️</div>
+        <h2>Could Not Connect to InfraSync Backend</h2>
+        <p className="error-message">{error}</p>
+        <p className="error-hint">
+          Ensure FastAPI is running on <code>http://localhost:8000</code> with CORS
+          enabled.
+        </p>
+        <button className="btn-retry" onClick={refreshProject}>
+          ↻ Retry Connection
+        </button>
+      </div>
+    );
+  }
 
-  // The real screen: a heading and a list of the work packages.
   return (
-    <main className="app">
-      <h1>InfraSync</h1>
-      <p>
-        Loaded {project.packages.length} work packages across{" "}
-        {project.segments.length} segment(s).
-      </p>
-      <ul>
-        {project.packages.map((pkg) => (
-          <li key={pkg.id}>
-            <strong>{pkg.name}</strong> — {pkg.utility}, {pkg.duration_days} days
-          </li>
-        ))}
-      </ul>
-    </main>
+    <div className="app-shell">
+      {/* Top Header / Navigation Bar */}
+      <Header
+        project={project}
+        plan={plan}
+        isActing={isActing}
+        onRefresh={refreshProject}
+      />
+
+      {/* Main 3-Region Grid Layout */}
+      <main className="shell-grid">
+        {/* Left Primary Column: Spatial & Temporal Coordination */}
+        <div className="shell-primary-column">
+          {/* Region 1: Map View (Leaflet GIS) */}
+          <MapRegion project={project} />
+
+          {/* Region 2: Timeline View (CP-SAT Gantt) */}
+          <TimelineRegion project={project} plan={plan} />
+        </div>
+
+        {/* Right Secondary Column: Autonomous Simulation & Decision Engine */}
+        <div className="shell-secondary-column">
+          {/* Region 3: Scenario & AI Replan Panel */}
+          <ScenarioRegion
+            project={project}
+            plan={plan}
+            replan={replan}
+            isActing={isActing}
+            actionError={actionError}
+            onTriggerReplan={triggerReplan}
+            onApprove={approveProposal}
+            onReject={rejectProposal}
+            onClearError={clearActionError}
+          />
+        </div>
+      </main>
+    </div>
   );
 }
