@@ -78,7 +78,7 @@ export default function App(): React.ReactElement {
         {/* Left Primary Column: Spatial & Temporal Coordination */}
         <div className="shell-primary-column">
           {/* Region 1: Map View (Leaflet GIS) */}
-          <MapRegion project={project} />
+          <MapRegion project={project} replan={replan} />
 
           {/* Region 2: Timeline View (CP-SAT Gantt) */}
           <TimelineRegion project={project} plan={plan} />
