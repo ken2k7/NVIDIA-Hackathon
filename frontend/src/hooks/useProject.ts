@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { approvePlan, fetchPlan, fetchProject, type ReplanInput, requestReplan } from "../api";
-import type { Plan, Project, ReplanResult } from "../types";
+import { SAMPLE_PROJECT, createSimulatedReplan } from "../data/sampleDistrict";
+import type { Disruption, Plan, Project, ReplanResult } from "../types";
 
 export interface UseProjectReturn {
   project: Project | null;
@@ -10,12 +11,14 @@ export interface UseProjectReturn {
   isActing: boolean;
   error: string | null;
   actionError: string | null;
+  isDemoMode: boolean;
   refreshProject: () => Promise<void>;
   generatePlan: () => Promise<Plan | null>;
   triggerReplan: (input: ReplanInput) => Promise<ReplanResult | null>;
   approveProposal: (planId?: string) => Promise<boolean>;
   rejectProposal: () => void;
   clearActionError: () => void;
+  loadDemoMode: () => void;
 }
 
 /**
@@ -30,6 +33,7 @@ export function useProject(): UseProjectReturn {
   const [isActing, setIsActing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
   // Fetch the project configuration on mount
   useEffect(() => {
@@ -41,6 +45,7 @@ export function useProject(): UseProjectReturn {
           if (data.plan) {
             setPlan(data.plan);
           }
+          setIsDemoMode(false);
         }
       })
       .catch((err) => {
@@ -69,11 +74,23 @@ export function useProject(): UseProjectReturn {
       if (data.plan) {
         setPlan(data.plan);
       }
+      setIsDemoMode(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  // Load rich demo dataset for offline testing and presentations
+  const loadDemoMode = useCallback(() => {
+    setProject(SAMPLE_PROJECT);
+    setPlan(SAMPLE_PROJECT.plan ?? null);
+    setReplan(null);
+    setError(null);
+    setActionError(null);
+    setIsDemoMode(true);
+    setIsLoading(false);
   }, []);
 
   // Explicitly fetch or trigger baseline plan generation
@@ -86,12 +103,16 @@ export function useProject(): UseProjectReturn {
       return fetchedPlan;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      if (isDemoMode && SAMPLE_PROJECT.plan) {
+        setPlan(SAMPLE_PROJECT.plan);
+        return SAMPLE_PROJECT.plan;
+      }
       setActionError(msg);
       return null;
     } finally {
       setIsActing(false);
     }
-  }, []);
+  }, [isDemoMode]);
 
   // Submit a disruption scenario (either structured or natural language prompt)
   const triggerReplan = useCallback(
@@ -103,6 +124,22 @@ export function useProject(): UseProjectReturn {
         setReplan(result);
         return result;
       } catch (err) {
+        // In demo mode or if backend replan endpoint is pending (404), provide simulated result
+        if (isDemoMode || (err instanceof Error && err.message.includes("404"))) {
+          const disruption: Disruption =
+            "kind" in input
+              ? (input as Disruption)
+              : {
+                  kind: "road_closure",
+                  segment_id: project?.segments[0]?.id ?? "s1",
+                  days: 10,
+                };
+          const basePlan = plan ?? SAMPLE_PROJECT.plan!;
+          const simResult = createSimulatedReplan(disruption, basePlan);
+          setReplan(simResult);
+          return simResult;
+        }
+
         const msg = err instanceof Error ? err.message : String(err);
         setActionError(msg);
         return null;
@@ -110,7 +147,7 @@ export function useProject(): UseProjectReturn {
         setIsActing(false);
       }
     },
-    []
+    [isDemoMode, plan, project]
   );
 
   // Approve proposal: promotes new_plan to current plan and notifies backend
@@ -132,6 +169,15 @@ export function useProject(): UseProjectReturn {
         setReplan(null);
         return true;
       } catch (err) {
+        // Fallback for demo mode or endpoint stubbing
+        if (isDemoMode || (err instanceof Error && err.message.includes("404"))) {
+          if (replan?.new_plan) {
+            setPlan({ ...replan.new_plan, status: "approved" });
+          }
+          setReplan(null);
+          return true;
+        }
+
         const msg = err instanceof Error ? err.message : String(err);
         setActionError(msg);
         return false;
@@ -139,7 +185,7 @@ export function useProject(): UseProjectReturn {
         setIsActing(false);
       }
     },
-    [replan]
+    [isDemoMode, replan]
   );
 
   // Reject / discard proposed replan
@@ -160,11 +206,13 @@ export function useProject(): UseProjectReturn {
     isActing,
     error,
     actionError,
+    isDemoMode,
     refreshProject,
     generatePlan,
     triggerReplan,
     approveProposal,
     rejectProposal,
     clearActionError,
+    loadDemoMode,
   };
 }

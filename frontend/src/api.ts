@@ -4,7 +4,7 @@
 import type { Disruption, Plan, Project, ReplanResult } from "./types";
 
 // Read the backend address from .env.local / Vite env with localhost fallback.
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const API_URL = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
 
 async function handleResponse<T>(res: Response, endpoint: string): Promise<T> {
   if (!res.ok) {

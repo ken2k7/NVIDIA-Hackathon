@@ -5,6 +5,7 @@ interface HeaderProps {
   project: Project | null;
   plan: Plan | null;
   isActing: boolean;
+  isDemoMode?: boolean;
   onRefresh: () => void;
 }
 
@@ -12,6 +13,7 @@ export const Header: React.FC<HeaderProps> = ({
   project,
   plan,
   isActing,
+  isDemoMode = false,
   onRefresh,
 }) => {
   const segmentCount = project?.segments.length ?? 0;
@@ -45,7 +47,22 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-actions">
+        <span
+          className={`connection-status-badge ${
+            isDemoMode ? "badge-demo" : "badge-live"
+          }`}
+          title={
+            isDemoMode
+              ? "Running in offline demo mode"
+              : "Connected to FastAPI backend"
+          }
+        >
+          <span className={`status-dot ${isDemoMode ? "amber" : "green"}`}></span>
+          {isDemoMode ? "Demo Mode" : "FastAPI Live"}
+        </span>
+
         <button
+          id="btn-sync-header"
           className="btn-refresh"
           onClick={onRefresh}
           disabled={isActing}

@@ -15,11 +15,13 @@ export default function App(): React.ReactElement {
     isActing,
     error,
     actionError,
+    isDemoMode,
     refreshProject,
     triggerReplan,
     approveProposal,
     rejectProposal,
     clearActionError,
+    loadDemoMode,
   } = useProject();
 
   // Full-page Loading State
@@ -44,9 +46,18 @@ export default function App(): React.ReactElement {
           Ensure FastAPI is running on <code>http://localhost:8000</code> with CORS
           enabled.
         </p>
-        <button className="btn-retry" onClick={refreshProject}>
-          ↻ Retry Connection
-        </button>
+        <div className="error-actions-group">
+          <button id="btn-retry" className="btn-retry" onClick={refreshProject}>
+            ↻ Retry Connection
+          </button>
+          <button
+            id="btn-demo-mode"
+            className="btn-demo-fallback"
+            onClick={loadDemoMode}
+          >
+            ⚡ Launch Demo Offline Mode
+          </button>
+        </div>
       </div>
     );
   }
@@ -58,6 +69,7 @@ export default function App(): React.ReactElement {
         project={project}
         plan={plan}
         isActing={isActing}
+        isDemoMode={isDemoMode}
         onRefresh={refreshProject}
       />
 
