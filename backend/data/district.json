@@ -1,0 +1,227 @@
+{
+  "total_budget_usd": 12000000,
+  "deadline_day": 300,
+  "max_closure": 14000,
+
+  "crews": [
+    { "type": "excavation", "capacity": 4 },
+    { "type": "paving", "capacity": 2 }
+  ],
+
+  "segments": [
+    {
+      "id": "s_main",
+      "name": "7th Avenue",
+      "coords": [[40.7550, -73.9870], [40.7600, -73.9830]],
+      "traffic_weight": 95,
+      "corridor_group": "C1"
+    },
+    {
+      "id": "s_broadway",
+      "name": "Broadway",
+      "coords": [[40.7560, -73.9858], [40.7610, -73.9818]],
+      "traffic_weight": 88,
+      "corridor_group": "C1"
+    },
+    {
+      "id": "s_5th",
+      "name": "5th Avenue",
+      "coords": [[40.7520, -73.9780], [40.7570, -73.9740]],
+      "traffic_weight": 85,
+      "moratorium_until_day": 30
+    },
+    {
+      "id": "s_oak",
+      "name": "Park Avenue",
+      "coords": [[40.7500, -73.9760], [40.7550, -73.9720]],
+      "traffic_weight": 70
+    },
+    {
+      "id": "s_elm",
+      "name": "Lexington Avenue",
+      "coords": [[40.7490, -73.9700], [40.7540, -73.9660]],
+      "traffic_weight": 60
+    },
+    {
+      "id": "s_pine",
+      "name": "Madison Avenue",
+      "coords": [[40.7505, -73.9740], [40.7555, -73.9700]],
+      "traffic_weight": 75
+    }
+  ],
+
+  "projects": [
+    {
+      "id": "PRJ_01",
+      "name": "7th Ave Water Main Renewal",
+      "utility": "water",
+      "segment_id": "s_main",
+      "duration_days": 20,
+      "cost_estimate_usd": 1200000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 10,
+      "latest_finish_day": 120,
+      "target_start_day": 15,
+      "shift_cost_per_day": 300
+    },
+    {
+      "id": "PRJ_02",
+      "name": "7th Ave Fiber Conduit",
+      "utility": "fiber",
+      "segment_id": "s_main",
+      "duration_days": 12,
+      "cost_estimate_usd": 400000,
+      "crew_type": "excavation",
+      "crews_needed": 1,
+      "depends_on": [],
+      "earliest_start_day": 10,
+      "latest_finish_day": 120,
+      "target_start_day": 35,
+      "shift_cost_per_day": 300
+    },
+    {
+      "id": "PRJ_03",
+      "name": "7th Ave Repaving",
+      "utility": "road",
+      "segment_id": "s_main",
+      "duration_days": 10,
+      "cost_estimate_usd": 800000,
+      "crew_type": "paving",
+      "crews_needed": 1,
+      "depends_on": ["PRJ_01", "PRJ_02"],
+      "earliest_start_day": 0,
+      "latest_finish_day": 140,
+      "target_start_day": 50,
+      "shift_cost_per_day": 500
+    },
+    {
+      "id": "PRJ_04",
+      "name": "Broadway Water Main",
+      "utility": "water",
+      "segment_id": "s_broadway",
+      "duration_days": 18,
+      "cost_estimate_usd": 1000000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 10,
+      "latest_finish_day": 120,
+      "target_start_day": 18,
+      "shift_cost_per_day": 400
+    },
+    {
+      "id": "PRJ_05",
+      "name": "5th Ave Drainage Upgrade",
+      "utility": "drainage",
+      "segment_id": "s_5th",
+      "duration_days": 14,
+      "cost_estimate_usd": 700000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 5,
+      "latest_finish_day": 120,
+      "target_start_day": 10,
+      "shift_cost_per_day": 350
+    },
+    {
+      "id": "PRJ_06",
+      "name": "Park Ave Storm Sewer",
+      "utility": "drainage",
+      "segment_id": "s_oak",
+      "duration_days": 22,
+      "cost_estimate_usd": 1500000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 5,
+      "latest_finish_day": 50,
+      "target_start_day": 15,
+      "shift_cost_per_day": 350
+    },
+    {
+      "id": "PRJ_07",
+      "name": "Park Ave Water Transmission",
+      "utility": "water",
+      "segment_id": "s_oak",
+      "duration_days": 16,
+      "cost_estimate_usd": 1300000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 210,
+      "latest_finish_day": 265,
+      "target_start_day": 225,
+      "shift_cost_per_day": 400
+    },
+    {
+      "id": "PRJ_08",
+      "name": "Lexington Sanitary Sewer",
+      "utility": "drainage",
+      "segment_id": "s_elm",
+      "duration_days": 18,
+      "cost_estimate_usd": 1100000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 10,
+      "latest_finish_day": 120,
+      "target_start_day": 40,
+      "shift_cost_per_day": 600
+    },
+    {
+      "id": "PRJ_09",
+      "name": "Lexington Streetlight Conduit",
+      "utility": "fiber",
+      "segment_id": "s_elm",
+      "duration_days": 6,
+      "cost_estimate_usd": 250000,
+      "crew_type": "excavation",
+      "crews_needed": 1,
+      "depends_on": [],
+      "earliest_start_day": 10,
+      "latest_finish_day": 120,
+      "target_start_day": 85,
+      "shift_cost_per_day": 700
+    },
+    {
+      "id": "PRJ_10",
+      "name": "Madison High-Pressure Water Main",
+      "utility": "water",
+      "segment_id": "s_pine",
+      "duration_days": 16,
+      "cost_estimate_usd": 1400000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 90,
+      "latest_finish_day": 160,
+      "target_start_day": 95,
+      "shift_cost_per_day": 450
+    },
+    {
+      "id": "PRJ_11",
+      "name": "Madison Trunk Sewer",
+      "utility": "drainage",
+      "segment_id": "s_pine",
+      "duration_days": 16,
+      "cost_estimate_usd": 1350000,
+      "crew_type": "excavation",
+      "crews_needed": 2,
+      "depends_on": [],
+      "earliest_start_day": 90,
+      "latest_finish_day": 160,
+      "target_start_day": 95,
+      "shift_cost_per_day": 450
+    }
+  ],
+
+  "colocations": [
+    { "project_a": "PRJ_01", "project_b": "PRJ_02", "compatible": true,  "synergy_cost_usd": 115000 },
+    { "project_a": "PRJ_06", "project_b": "PRJ_07", "compatible": true,  "synergy_cost_usd": 140000 },
+    { "project_a": "PRJ_08", "project_b": "PRJ_09", "compatible": true,  "synergy_cost_usd": 4500 },
+    { "project_a": "PRJ_10", "project_b": "PRJ_11", "compatible": false, "synergy_cost_usd": 160000 }
+  ]
+}
