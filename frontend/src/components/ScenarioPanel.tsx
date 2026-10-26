@@ -7,6 +7,8 @@ import {
   AlertTriangle,
   Send,
   Cpu,
+  Radio,
+  FileText,
 } from "lucide-react";
 import type { Plan, Project, ReplanResult } from "../types";
 import type { ReplanInput } from "../api";
@@ -24,28 +26,12 @@ export interface ScenarioPanelProps {
   onClearError: () => void;
 }
 
-// Sample incident dispatches for 1-click evaluation during presentations
-const SAMPLE_DISPATCH_PROMPTS = [
-  {
-    icon: "🌧️",
-    label: "Monsoon Storm",
-    text: "Heavy monsoon storm forecast for next 2 weeks; ground saturation stops deep trench excavation.",
-  },
-  {
-    icon: "🚧",
-    label: "Main St Sinkhole",
-    text: "Water main rupture on Main Street requires 14-day emergency road closure and utility excavation.",
-  },
-  {
-    icon: "💰",
-    label: "Budget Cap",
-    text: "City council cuts municipal infrastructure capital budget cap to $460,000 for this quarter.",
-  },
-  {
-    icon: "🚨",
-    label: "Gas Hazard",
-    text: "Hazardous gas leak detected near 2nd Avenue; critical corridor access required for 8 days.",
-  },
+// Internal stream of incoming field reports for telemetry simulation
+const LIVE_DISPATCH_FEED = [
+  "Water main rupture on Main Street requires 14-day emergency road closure and utility excavation.",
+  "Heavy monsoon storm forecast for next 2 weeks; ground saturation stops deep trench excavation.",
+  "City council cuts municipal infrastructure capital budget cap to $460,000 for this quarter.",
+  "Hazardous gas leak detected near 2nd Avenue; critical corridor access required for 8 days.",
 ];
 
 export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
@@ -58,18 +44,21 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
   onReject,
   onClearError,
 }) => {
-  const [promptText, setPromptText] = useState(
-    "Water main rupture on Main Street requires 14-day emergency road closure and utility excavation."
-  );
+  const [promptText, setPromptText] = useState(LIVE_DISPATCH_FEED[0]);
+  const [analyzedPrompt, setAnalyzedPrompt] = useState<string>(LIVE_DISPATCH_FEED[0]);
+  const [feedIndex, setFeedIndex] = useState(0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!promptText.trim() || isActing) return;
+    setAnalyzedPrompt(promptText.trim());
     onTriggerReplan({ text: promptText.trim() });
   };
 
-  const handleSelectSample = (text: string) => {
-    setPromptText(text);
+  const handleFetchSimulatedAlert = () => {
+    const nextIdx = (feedIndex + 1) % LIVE_DISPATCH_FEED.length;
+    setFeedIndex(nextIdx);
+    setPromptText(LIVE_DISPATCH_FEED[nextIdx]);
   };
 
   // Metric comparisons when replan proposal is active
@@ -108,12 +97,21 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
       {/* Active Proposal View (Diagnosed by Nemotron & Solved by CP-SAT) */}
       {replan ? (
         <div className="results-proposal-card">
-          {/* Nemotron Diagnosis Header */}
+          {/* Situation Ingested Banner */}
+          <div className="ingested-situation-banner">
+            <div className="ingested-situation-header">
+              <FileText size={13} color="var(--accent-purple)" />
+              <span className="ingested-label">Ingested Situation Report</span>
+            </div>
+            <p className="ingested-situation-text">"{analyzedPrompt || promptText}"</p>
+          </div>
+
+          {/* Nemotron Autonomous Diagnosis Header */}
           <div className="nemotron-diagnosis-box">
             <div className="diagnosis-top-row">
               <span className="nemotron-tag">
                 <Sparkles size={13} />
-                Nemotron AI Diagnosis
+                Nemotron Autonomous Diagnosis
               </span>
               <span className="solver-status-pill">
                 <Cpu size={12} />
@@ -123,7 +121,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
 
             <div className="diagnosis-summary">
               <span className="diagnosis-kind">
-                Detected Scenario: <strong>{replan.disruption.kind.replace("_", " ").toUpperCase()}</strong>
+                Diagnosed Scenario: <strong>{replan.disruption.kind.replace("_", " ").toUpperCase()}</strong>
               </span>
               <span className="diagnosis-param">
                 {replan.disruption.kind === "road_closure" &&
@@ -227,7 +225,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
             </div>
           </div>
 
-          {/* NVIDIA Nemotron AI Reasoning Synthesis (Issue #10 Slot) */}
+          {/* NVIDIA Nemotron AI Reasoning Synthesis */}
           <div className="nemotron-explanation-card">
             <div className="nemotron-badge-header">
               <span className="nemotron-pill">
@@ -287,45 +285,43 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
             <div className="console-header">
               <div className="console-title-group">
                 <Sparkles size={15} color="var(--accent-purple)" />
-                <span className="console-title">Nemotron Situation Dispatch</span>
+                <span className="console-title">Nemotron Situation Intake</span>
               </div>
-              <span className="console-tag">Natural Language $\rightarrow$ Constraints</span>
+              <span className="console-tag">
+                <Radio size={10} className="pulse-dot" /> Live Telemetry
+              </span>
             </div>
 
             <p className="console-subtitle">
-              Describe an unforeseen incident or city situation. Nemotron will analyze the issue,
-              formulate constraints, and re-optimize the coordinated schedule.
+              Enter any unforeseen field incident, municipal dispatch, or weather alert.
+              Nemotron autonomously diagnoses the disruption, formulates mathematical constraints, and re-optimizes the coordinated schedule.
             </p>
+
+            <div className="situation-input-toolbar">
+              <label htmlFor="situation-input" className="input-field-label">
+                Incident Dispatch / Situation Report
+              </label>
+              <button
+                type="button"
+                className="btn-fetch-feed"
+                onClick={handleFetchSimulatedAlert}
+                disabled={isActing}
+                title="Fetch next incoming alert from simulated city telemetry stream"
+              >
+                <Radio size={12} className="pulse-dot" />
+                <span>Simulate Field Incident</span>
+              </button>
+            </div>
 
             <textarea
               id="situation-input"
               className="situation-textarea"
-              placeholder="e.g. Flood on Main Street halts pipe trenching for 14 days..."
+              placeholder="e.g. Water main rupture on Main Street requires emergency excavation for 14 days..."
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
               disabled={isActing}
               rows={3}
             />
-
-            {/* Quick Sample Incident Chips */}
-            <div className="sample-dispatches-section">
-              <span className="samples-label">Quick Incident Dispatches:</span>
-              <div className="sample-chips-row">
-                {SAMPLE_DISPATCH_PROMPTS.map((sample, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className="sample-chip-btn"
-                    onClick={() => handleSelectSample(sample.text)}
-                    disabled={isActing}
-                    title={sample.text}
-                  >
-                    <span>{sample.icon}</span>
-                    <span>{sample.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <button
               type="submit"
@@ -335,12 +331,12 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
               {isActing ? (
                 <>
                   <Zap size={14} className="spinning-icon" />
-                  <span>Nemotron Analyzing & Re-Solving…</span>
+                  <span>Nemotron Diagnosing & Re-Solving…</span>
                 </>
               ) : (
                 <>
                   <Send size={14} />
-                  <span>Analyze Situation & Re-Optimize</span>
+                  <span>Diagnose with Nemotron & Re-Optimize</span>
                 </>
               )}
             </button>
