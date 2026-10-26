@@ -1,8 +1,8 @@
 """InfraSync backend — application entry point.
 
-This creates the FastAPI app and defines two endpoints:
+This creates the FastAPI app and defines:
   GET /health   -> a simple "am I alive?" check
-  GET /project  -> hardcoded sample data (a stub we'll replace with real logic)
+  GET /project  -> the full validated district dataset (loaded from district.json)
 
 Run it from the backend/ folder with:
   uvicorn app.main:app --reload --port 8000
@@ -12,7 +12,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.models.schemas import Project, Segment, WorkPackage
+from app.models.schemas import District
+from app.services.dataset import load_district
 
 # The application object. "title" shows up in the auto-generated docs page.
 app = FastAPI(title="InfraSync API")
@@ -33,32 +34,12 @@ def health():
     return {"status": "ok"}
 
 
-@app.get("/project", response_model=Project)
+@app.get("/project", response_model=District)
 def get_project():
-    """Return a hardcoded sample project.
+    """Return the full synthetic district: segments, projects, crews, co-locations.
 
-    This is a STUB: the data is fixed for now. Later, this will build the real
-    project (street network + work packages) instead of this fixed example.
-    'response_model=Project' makes FastAPI validate the output against our schema.
+    'plan' is null here — the deterministic solver (issue #2) will compute and
+    attach the schedule later. 'response_model=District' makes FastAPI validate
+    the output against our schema before sending it.
     """
-    return Project(
-        segments=[
-            Segment(id="s1", name="Main Street"),
-        ],
-        packages=[
-            WorkPackage(
-                id="wp-1",
-                name="Replace water main",
-                utility="water",
-                segment_id="s1",
-                duration_days=14,
-            ),
-            WorkPackage(
-                id="wp-2",
-                name="Lay fiber conduit",
-                utility="fiber",
-                segment_id="s1",
-                duration_days=5,
-            ),
-        ],
-    )
+    return load_district()
