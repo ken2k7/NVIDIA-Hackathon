@@ -1,0 +1,492 @@
+{
+    "metadata": {
+        "dataset_name": "InfraSync_EdgeCase_Benchmark_v1",
+        "planning_horizon_days": 365,
+        "time_unit": "days",
+        "currency": "USD",
+        "objective_weights": {
+            "w1_makespan_per_day": 1500,
+            "w2_disruption_per_point": 250,
+            "w3_direct_cost_multiplier": 1.0,
+            "w4_risk_penalty_multiplier": 1.0
+        },
+        "high_precipitation_windows": [
+            {
+                "window_id": "MONSOON_Q2",
+                "start_day": 65,
+                "end_day": 95,
+                "daily_earthwork_risk_penalty_usd": 12000,
+                "description": "Spring heavy precipitation interval; deep trenching incurs severe dewatering, shoring, andwashout risk."
+            }
+        ]
+    },
+    "resources": [
+        {
+            "resource_id": "CREW_EXCAVATION",
+            "name": "Heavy Trenching & Earthworks Crew",
+            "max_capacity": 4,
+            "unit_type": "crews"
+        },
+        {
+            "resource_id": "CREW_PIPE_UTILITY",
+            "name": "Wet Utility & Pressurized Pipe Crew",
+            "max_capacity": 3,
+            "unit_type": "crews"
+        },
+        {
+            "resource_id": "CREW_TELECOM_POWER",
+            "name": "Dry Conduit, Fiber & HV Cable Crew",
+            "max_capacity": 3,
+            "unit_type": "crews"
+        },
+        {
+            "resource_id": "CREW_PAVING",
+            "name": "Asphalt Milling & Wearing Course Crew",
+            "max_capacity": 2,
+            "unit_type": "crews"
+        }
+    ],
+    "streets": [
+        {
+            "street_id": "ST_MAIN",
+            "name": "Main Street Corridor",
+            "traffic_impact_score": 95,
+            "moratorium_duration_days": 1095,
+            "parallel_corridor_id": "ST_BROADWAY",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -73.9851,
+                        40.7484
+                    ],
+                    [
+                        -73.9810,
+                        40.7520
+                    ]
+                ]
+            }
+        },
+        {
+            "street_id": "ST_BROADWAY",
+            "name": "Broadway Arterial",
+            "traffic_impact_score": 90,
+            "moratorium_duration_days": 1095,
+            "parallel_corridor_id": "ST_MAIN",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -73.9870,
+                        40.7492
+                    ],
+                    [
+                        -73.9829,
+                        40.7528
+                    ]
+                ]
+            }
+        },
+        {
+            "street_id": "ST_OAK",
+            "name": "Oak Avenue",
+            "traffic_impact_score": 60,
+            "moratorium_duration_days": 730,
+            "parallel_corridor_id": null,
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -73.9910,
+                        40.7450
+                    ],
+                    [
+                        -73.9865,
+                        40.7475
+                    ]
+                ]
+            }
+        },
+        {
+            "street_id": "ST_ELM",
+            "name": "Elm Street Collector",
+            "traffic_impact_score": 45,
+            "moratorium_duration_days": 730,
+            "parallel_corridor_id": null,
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -73.9800,
+                        40.7410
+                    ],
+                    [
+                        -73.9755,
+                        40.7440
+                    ]
+                ]
+            }
+        },
+        {
+            "street_id": "ST_PINE",
+            "name": "Pine Industrial Blvd",
+            "traffic_impact_score": 70,
+            "moratorium_duration_days": 1095,
+            "parallel_corridor_id": null,
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -73.9950,
+                        40.7550
+                    ],
+                    [
+                        -73.9900,
+                        40.7580
+                    ]
+                ]
+            }
+        },
+        {
+            "street_id": "ST_MARKET",
+            "name": "Market District Connector",
+            "traffic_impact_score": 85,
+            "moratorium_duration_days": 1095,
+            "parallel_corridor_id": null,
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -73.9780,
+                        40.7500
+                    ],
+                    [
+                        -73.9730,
+                        40.7535
+                    ]
+                ]
+            }
+        }
+    ],
+    "projects": [
+        {
+            "project_id": "PRJ_01",
+            "name": "Main St Deep Cast-Iron Water Main Replacement",
+            "department": "Municipal Water Authority",
+            "utility_type": "WATER",
+            "street_id": "ST_MAIN",
+            "duration_days": 20,
+            "earliest_start_day": 10,
+            "target_start_day": 15,
+            "latest_finish_day": 60,
+            "base_cost_usd": 450000,
+            "early_shift_penalty_per_day_usd": 400,
+            "late_shift_penalty_per_day_usd": 800,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 2,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "HIGH_SYNERGY_SWEET_SPOT_A"
+        },
+        {
+            "project_id": "PRJ_02",
+            "name": "Main St Municipal Fiber Backbone Conduit",
+            "department": "Department of Information Technology",
+            "utility_type": "TELECOM_FIBER",
+            "street_id": "ST_MAIN",
+            "duration_days": 12,
+            "earliest_start_day": 10,
+            "target_start_day": 35,
+            "latest_finish_day": 65,
+            "base_cost_usd": 180000,
+            "early_shift_penalty_per_day_usd": 300,
+            "late_shift_penalty_per_day_usd": 500,
+            "is_deep_earthwork": false,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 1,
+                "CREW_PIPE_UTILITY": 0,
+                "CREW_TELECOM_POWER": 2,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "HIGH_SYNERGY_SWEET_SPOT_B"
+        },
+        {
+            "project_id": "PRJ_03",
+            "name": "Main St Full-Depth Asphalt Milling & Repaving",
+            "department": "Department of Transportation (Roads)",
+            "utility_type": "PAVING",
+            "street_id": "ST_MAIN",
+            "duration_days": 10,
+            "earliest_start_day": 20,
+            "target_start_day": 30,
+            "latest_finish_day": 90,
+            "base_cost_usd": 320000,
+            "early_shift_penalty_per_day_usd": 250,
+            "late_shift_penalty_per_day_usd": 600,
+            "is_deep_earthwork": false,
+            "triggers_pavement_moratorium": true,
+            "subject_to_pavement_moratorium": false,
+            "crew_demand": {
+                "CREW_EXCAVATION": 0,
+                "CREW_PIPE_UTILITY": 0,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 2
+            },
+            "edge_case_tag": "MORATORIUM_GENERATOR_AND_PRECEDENCE_CAP"
+        },
+        {
+            "project_id": "PRJ_04",
+            "name": "Oak Ave Box Culvert Storm Sewer Upgrade (Q1 Grant)",
+            "department": "Stormwater & Drainage Division",
+            "utility_type": "DRAINAGE",
+            "street_id": "ST_OAK",
+            "duration_days": 25,
+            "earliest_start_day": 5,
+            "target_start_day": 15,
+            "latest_finish_day": 50,
+            "base_cost_usd": 520000,
+            "early_shift_penalty_per_day_usd": 500,
+            "late_shift_penalty_per_day_usd": 15000,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 2,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "SIX_MONTH_GAP_LOCKED_Q1"
+        },
+        {
+            "project_id": "PRJ_05",
+            "name": "Oak Ave District Heating Thermal Loop (Q3 Fiscal Release)",
+            "department": "Municipal Energy & Steam",
+            "utility_type": "DISTRICT_ENERGY",
+            "street_id": "ST_OAK",
+            "duration_days": 20,
+            "earliest_start_day": 210,
+            "target_start_day": 225,
+            "latest_finish_day": 265,
+            "base_cost_usd": 490000,
+            "early_shift_penalty_per_day_usd": 12000,
+            "late_shift_penalty_per_day_usd": 1000,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 1,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "SIX_MONTH_GAP_LOCKED_Q3"
+        },
+        {
+            "project_id": "PRJ_06",
+            "name": "Elm St Sanitary Sewer Relining & Trenching",
+            "department": "Wastewater Services",
+            "utility_type": "SEWER",
+            "street_id": "ST_ELM",
+            "duration_days": 15,
+            "earliest_start_day": 30,
+            "target_start_day": 40,
+            "latest_finish_day": 110,
+            "base_cost_usd": 260000,
+            "early_shift_penalty_per_day_usd": 600,
+            "late_shift_penalty_per_day_usd": 900,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 1,
+                "CREW_PIPE_UTILITY": 1,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "LOW_SYNERGY_TRAP_A"
+        },
+        {
+            "project_id": "PRJ_07",
+            "name": "Elm St Smart Streetlight Micro-Trenching",
+            "department": "Bureau of Street Lighting",
+            "utility_type": "ELECTRICAL_LOW_VOLT",
+            "street_id": "ST_ELM",
+            "duration_days": 8,
+            "earliest_start_day": 55,
+            "target_start_day": 85,
+            "latest_finish_day": 120,
+            "base_cost_usd": 95000,
+            "early_shift_penalty_per_day_usd": 750,
+            "late_shift_penalty_per_day_usd": 750,
+            "is_deep_earthwork": false,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": false,
+            "crew_demand": {
+                "CREW_EXCAVATION": 1,
+                "CREW_PIPE_UTILITY": 0,
+                "CREW_TELECOM_POWER": 1,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "LOW_SYNERGY_TRAP_B"
+        },
+        {
+            "project_id": "PRJ_08",
+            "name": "Broadway Arterial Gas Main Replacement",
+            "department": "Metro Gas & Energy",
+            "utility_type": "GAS",
+            "street_id": "ST_BROADWAY",
+            "duration_days": 18,
+            "earliest_start_day": 12,
+            "target_start_day": 18,
+            "latest_finish_day": 75,
+            "base_cost_usd": 410000,
+            "early_shift_penalty_per_day_usd": 350,
+            "late_shift_penalty_per_day_usd": 700,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 1,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "PARALLEL_CORRIDOR_CONFLICT_WITH_MAIN_ST"
+        },
+        {
+            "project_id": "PRJ_09",
+            "name": "Pine Blvd High-Pressure Potable Water Feeder",
+            "department": "Municipal Water Authority",
+            "utility_type": "WATER",
+            "street_id": "ST_PINE",
+            "duration_days": 16,
+            "earliest_start_day": 95,
+            "target_start_day": 105,
+            "latest_finish_day": 145,
+            "base_cost_usd": 380000,
+            "early_shift_penalty_per_day_usd": 300,
+            "late_shift_penalty_per_day_usd": 500,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 2,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "SAFETY_CODE_INCOMPATIBLE_A"
+        },
+        {
+            "project_id": "PRJ_10",
+            "name": "Pine Blvd 69kV Underground Transmission Duct Bank",
+            "department": "City Power & Light",
+            "utility_type": "ELECTRICAL_HIGH_VOLT",
+            "street_id": "ST_PINE",
+            "duration_days": 16,
+            "earliest_start_day": 95,
+            "target_start_day": 108,
+            "latest_finish_day": 150,
+            "base_cost_usd": 610000,
+            "early_shift_penalty_per_day_usd": 450,
+            "late_shift_penalty_per_day_usd": 650,
+            "is_deep_earthwork": true,
+            "triggers_pavement_moratorium": false,
+            "subject_to_pavement_moratorium": true,
+            "crew_demand": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 0,
+                "CREW_TELECOM_POWER": 2,
+                "CREW_PAVING": 0
+            },
+            "edge_case_tag": "SAFETY_CODE_INCOMPATIBLE_B"
+        }
+    ],
+    "dependencies": [
+        {
+            "predecessor_id": "PRJ_01",
+            "successor_id": "PRJ_03",
+            "cure_lag_days": 5,
+            "reason": "Backfill compaction and concrete thrust-block curing required before Main St asphalt milling and repaving."
+        },
+        {
+            "predecessor_id": "PRJ_02",
+            "successor_id": "PRJ_03",
+            "cure_lag_days": 2,
+            "reason": "Fiber conduit slurry encasement must set prior to heavy asphalt roller load."
+        }
+    ],
+    "co_trenching_opportunities": [
+        {
+            "pair_id": "COT_MAIN_WATER_FIBER",
+            "project_a_id": "PRJ_01",
+            "project_b_id": "PRJ_02",
+            "street_id": "ST_MAIN",
+            "engineering_compatible": true,
+            "compatibility_notes": "NESC/AWWA compliant with 12-inch horizontal bench separation in shared open cut.",
+            "max_start_offset_epsilon_days": 3,
+            "synergy_discount_usd": 115000,
+            "combined_crew_demand_override": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 2,
+                "CREW_TELECOM_POWER": 2,
+                "CREW_PAVING": 0
+            },
+            "expected_solver_decision": "CO_TRENCH"
+        },
+        {
+            "pair_id": "COT_OAK_DRAIN_THERMAL",
+            "project_a_id": "PRJ_04",
+            "project_b_id": "PRJ_05",
+            "street_id": "ST_OAK",
+            "engineering_compatible": true,
+            "compatibility_notes": "Geometrically compatible in wide right-of-way trench, but separated by 6-month fiscal/grant lockouts.",
+            "max_start_offset_epsilon_days": 4,
+            "synergy_discount_usd": 140000,
+            "combined_crew_demand_override": {
+                "CREW_EXCAVATION": 3,
+                "CREW_PIPE_UTILITY": 2,
+                "CREW_TELECOM_POWER": 0,
+                "CREW_PAVING": 0
+            },
+            "expected_solver_decision": "REJECT_DUE_TO_6_MONTH_DEADLINE_GAP"
+        },
+        {
+            "pair_id": "COT_ELM_SEWER_LIGHTING",
+            "project_a_id": "PRJ_06",
+            "project_b_id": "PRJ_07",
+            "street_id": "ST_ELM",
+            "engineering_compatible": true,
+            "compatibility_notes": "Compatible, but PRJ_07 is shallow micro-trenching in the curb line; shared excavation savings are negligible.",
+            "max_start_offset_epsilon_days": 2,
+            "synergy_discount_usd": 4500,
+            "combined_crew_demand_override": {
+                "CREW_EXCAVATION": 2,
+                "CREW_PIPE_UTILITY": 1,
+                "CREW_TELECOM_POWER": 1,
+                "CREW_PAVING": 0
+            },
+            "expected_solver_decision": "REJECT_DUE_TO_LOW_SYNERGY_VS_SHIFT_PENALTY"
+        },
+        {
+            "pair_id": "COT_PINE_WATER_HV_POWER",
+            "project_a_id": "PRJ_09",
+            "project_b_id": "PRJ_10",
+            "street_id": "ST_PINE",
+            "engineering_compatible": false,
+            "compatibility_notes": "PROHIBITED: High-pressure water main and 69kV transmission duct bank cannot share an open trench due to catastrophic washout/arc-flash hazard code violations. Minimum 10ft undisturbed soil barrier required.",
+            "max_start_offset_epsilon_days": 0,
+            "synergy_discount_usd": 160000,
+            "combined_crew_demand_override": null,
+            "expected_solver_decision": "REJECT_HARD_ENGINEERING_INCOMPATIBILITY"
+        }
+    ]
+}
