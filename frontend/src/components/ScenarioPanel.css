@@ -1,4 +1,4 @@
-/* InfraSync Scenario Panel & Results Metrics Styling */
+/* InfraSync Scenario Panel & Nemotron Intelligence Styling */
 
 .scenario-panel-root {
   display: flex;
@@ -7,149 +7,155 @@
   width: 100%;
 }
 
-/* Tab Navigation for Scenarios */
-.scenario-nav-tabs {
+/* Action Error Banner */
+.action-error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-dismiss-error {
+  background: transparent;
+  border: none;
+  color: #fca5a5;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Situation Dispatch Console (AI-First Interface) */
+.situation-console-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.situation-form {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 4px;
-  gap: 4px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-.scenario-nav-tab {
-  flex: 1;
+.console-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
+  justify-content: space-between;
+}
+
+.console-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.console-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.console-tag {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent-purple);
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.console-subtitle {
   font-size: 12px;
-  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.situation-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(10, 12, 16, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text-main);
+  font-size: 13px;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.situation-textarea:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+
+/* Quick Incident Dispatch Chips */
+.sample-dispatches-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.samples-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sample-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sample-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--text-main);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.scenario-nav-tab:hover {
-  color: var(--text-main);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.scenario-nav-tab.active {
-  background: rgba(255, 255, 255, 0.1);
+.sample-chip-btn:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
   color: #fff;
-  font-weight: 600;
+  transform: translateY(-1px);
 }
 
-/* Preset Scenarios */
-.presets-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.scenario-card-btn {
-  display: flex;
+.btn-analyze-situation {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  color: var(--text-main);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-}
-
-.scenario-card-btn:hover:not(:disabled) {
-  background: var(--bg-card-hover);
-  border-color: rgba(118, 185, 0, 0.4);
-  transform: translateX(3px);
-}
-
-.scenario-card-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.scenario-card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.scenario-card-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-}
-
-.scenario-card-desc {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.scenario-card-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text-muted);
-}
-
-/* Structured Form */
-.structured-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 14px;
-}
-
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.form-row-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.form-select,
-.form-input {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  color: var(--text-main);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.form-select:focus,
-.form-input:focus {
-  border-color: var(--accent-nvidia);
-}
-
-.btn-simulate-custom {
-  background: linear-gradient(135deg, var(--accent-nvidia), #4d8000);
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--accent-purple), #6d28d9);
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
-  padding: 10px;
+  padding: 12px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -157,77 +163,21 @@
   transition: opacity 0.2s ease, transform 0.15s ease;
 }
 
-.btn-simulate-custom:hover:not(:disabled) {
+.btn-analyze-situation:hover:not(:disabled) {
   opacity: 0.92;
   transform: translateY(-1px);
 }
 
-.btn-simulate-custom:disabled {
+.btn-analyze-situation:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Natural Language Form */
-.nl-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 14px;
+.spinning-icon {
+  animation: spin 1s linear infinite;
 }
 
-.nl-textarea {
-  width: 100%;
-  box-sizing: border-box;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  color: var(--text-main);
-  font-size: 13px;
-  resize: vertical;
-  min-height: 70px;
-  outline: none;
-  font-family: var(--font-sans);
-  line-height: 1.4;
-}
-
-.nl-textarea:focus {
-  border-color: var(--accent-purple);
-}
-
-.nl-submit-row {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.btn-parse-nemotron {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, var(--accent-purple), #6d28d9);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.btn-parse-nemotron:hover:not(:disabled) {
-  opacity: 0.92;
-}
-
-.btn-parse-nemotron:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Active Results & Proposal Card */
+/* Results & Proposal Card (When Scenario is Diagnosed) */
 .results-proposal-card {
   display: flex;
   flex-direction: column;
@@ -236,42 +186,65 @@
   border: 1px solid rgba(245, 158, 11, 0.4);
   border-radius: var(--radius-md);
   padding: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
   animation: fadeIn 0.25s ease;
 }
 
-.results-header {
+/* Nemotron Diagnosis Header Box */
+.nemotron-diagnosis-box {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 12px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.results-badge-group {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
 }
 
-.badge-proposal-pending {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--accent-amber);
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 3px 8px;
-  border-radius: 4px;
+.diagnosis-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.disruption-badge {
-  font-family: var(--font-mono);
+.nemotron-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 11px;
-  color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 3px 8px;
+  font-weight: 700;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.solver-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--accent-nvidia);
+  background: rgba(118, 185, 0, 0.12);
+  border: 1px solid rgba(118, 185, 0, 0.3);
+  padding: 2px 7px;
   border-radius: 4px;
+  font-family: var(--font-mono);
+}
+
+.diagnosis-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.diagnosis-kind {
+  font-size: 13px;
+  color: #fff;
+}
+
+.diagnosis-param {
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 /* 4-Metric Comparison Grid */

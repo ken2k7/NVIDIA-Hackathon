@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { approvePlan, fetchPlan, fetchProject, type ReplanInput, requestReplan } from "../api";
-import { SAMPLE_PROJECT, createSimulatedReplan } from "../data/sampleDistrict";
+import { SAMPLE_PROJECT, createSimulatedReplan, parseSituationWithNemotron } from "../data/sampleDistrict";
 import type { Disruption, Plan, Project, ReplanResult } from "../types";
 
 export interface UseProjectReturn {
@@ -129,11 +129,10 @@ export function useProject(): UseProjectReturn {
           const disruption: Disruption =
             "kind" in input
               ? (input as Disruption)
-              : {
-                  kind: "road_closure",
-                  segment_id: project?.segments[0]?.id ?? "s1",
-                  days: 10,
-                };
+              : parseSituationWithNemotron(
+                  (input as { text: string }).text,
+                  project
+                );
           const basePlan = plan ?? SAMPLE_PROJECT.plan!;
           const simResult = createSimulatedReplan(disruption, basePlan);
           setReplan(simResult);

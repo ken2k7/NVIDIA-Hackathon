@@ -153,6 +153,101 @@ export const SAMPLE_PROJECT: Project = {
   },
 };
 
+/**
+ * Simulates Nemotron natural-language disruption parsing (Issue #11 / F7).
+ * Reads free-form situation text and diagnoses the exact structured disruption.
+ */
+export function parseSituationWithNemotron(
+  text: string,
+  project?: Project | null
+): Disruption {
+  const lower = text.toLowerCase();
+  const segments = project?.segments ?? SAMPLE_PROJECT.segments;
+
+  // Extract matching segment ID
+  let targetSegmentId = segments[0]?.id ?? "s1";
+  for (const seg of segments) {
+    if (
+      lower.includes(seg.id.toLowerCase()) ||
+      lower.includes(seg.name.toLowerCase())
+    ) {
+      targetSegmentId = seg.id;
+      break;
+    }
+  }
+
+  // Extract numbers (e.g. "14 days", "10 days")
+  const daysMatch = lower.match(/(\d+)\s*(?:d|day|days)/);
+  const extractedDays = daysMatch ? parseInt(daysMatch[1], 10) : 12;
+
+  // Extract budget amount (e.g. "$450k", "$500,000")
+  const budgetMatch = lower.match(/\$?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|m|million|thousand)?/);
+  let extractedBudget = 460000;
+  if (budgetMatch) {
+    let num = parseFloat(budgetMatch[1].replace(/,/g, ""));
+    const unit = budgetMatch[2];
+    if (unit === "k" || unit === "thousand") num *= 1000;
+    if (unit === "m" || unit === "million") num *= 1000000;
+    if (num > 50000) extractedBudget = Math.round(num);
+  }
+
+  // 1. Weather / Precipitation Diagnosis
+  if (
+    lower.includes("rain") ||
+    lower.includes("weather") ||
+    lower.includes("monsoon") ||
+    lower.includes("storm") ||
+    lower.includes("flood") ||
+    lower.includes("precipitation")
+  ) {
+    return {
+      kind: "weather",
+      from_day: 10,
+      to_day: 10 + Math.max(5, extractedDays),
+    };
+  }
+
+  // 2. Budget / Fiscal Cap Diagnosis
+  if (
+    lower.includes("budget") ||
+    lower.includes("cap") ||
+    lower.includes("funding") ||
+    lower.includes("treasury") ||
+    lower.includes("cost reduction") ||
+    lower.includes("cut")
+  ) {
+    return {
+      kind: "budget_change",
+      new_cap_usd: extractedBudget,
+    };
+  }
+
+  // 3. Emergency / Hazard Diagnosis
+  if (
+    lower.includes("emergency") ||
+    lower.includes("leak") ||
+    lower.includes("gas") ||
+    lower.includes("rupture") ||
+    lower.includes("hazard") ||
+    lower.includes("urgent") ||
+    lower.includes("collapse")
+  ) {
+    return {
+      kind: "emergency",
+      segment_id: targetSegmentId,
+      duration_days: Math.max(5, extractedDays),
+      priority: "CRITICAL",
+    };
+  }
+
+  // 4. Road Closure / Blockage Diagnosis (Default fallback)
+  return {
+    kind: "road_closure",
+    segment_id: targetSegmentId,
+    days: extractedDays,
+  };
+}
+
 export function createSimulatedReplan(
   disruption: Disruption,
   currentPlan: Plan

@@ -4,10 +4,11 @@ import {
   Zap,
   Check,
   X,
-  SlidersHorizontal,
   AlertTriangle,
+  Send,
+  Cpu,
 } from "lucide-react";
-import type { Disruption, Plan, Project, ReplanResult } from "../types";
+import type { Plan, Project, ReplanResult } from "../types";
 import type { ReplanInput } from "../api";
 import "./ScenarioPanel.css";
 
@@ -23,10 +24,31 @@ export interface ScenarioPanelProps {
   onClearError: () => void;
 }
 
-type TabMode = "presets" | "custom" | "natural";
+// Sample incident dispatches for 1-click evaluation during presentations
+const SAMPLE_DISPATCH_PROMPTS = [
+  {
+    icon: "🌧️",
+    label: "Monsoon Storm",
+    text: "Heavy monsoon storm forecast for next 2 weeks; ground saturation stops deep trench excavation.",
+  },
+  {
+    icon: "🚧",
+    label: "Main St Sinkhole",
+    text: "Water main rupture on Main Street requires 14-day emergency road closure and utility excavation.",
+  },
+  {
+    icon: "💰",
+    label: "Budget Cap",
+    text: "City council cuts municipal infrastructure capital budget cap to $460,000 for this quarter.",
+  },
+  {
+    icon: "🚨",
+    label: "Gas Hazard",
+    text: "Hazardous gas leak detected near 2nd Avenue; critical corridor access required for 8 days.",
+  },
+];
 
 export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
-  project,
   plan,
   replan,
   isActing,
@@ -36,68 +58,18 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
   onReject,
   onClearError,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabMode>("presets");
-  const [promptText, setPromptText] = useState("");
+  const [promptText, setPromptText] = useState(
+    "Water main rupture on Main Street requires 14-day emergency road closure and utility excavation."
+  );
 
-  // Structured custom form state
-  const segments = project?.segments ?? [];
-  const firstSegmentId = segments[0]?.id ?? "s1";
-  const secondSegmentId = segments[1]?.id ?? segments[0]?.id ?? "s2";
-
-  const [customKind, setCustomKind] = useState<
-    "road_closure" | "weather" | "budget_change" | "emergency"
-  >("road_closure");
-  const [selectedSegId, setSelectedSegId] = useState<string>(firstSegmentId);
-  const [closureDays, setClosureDays] = useState<number>(14);
-  const [weatherFrom, setWeatherFrom] = useState<number>(10);
-  const [weatherTo, setWeatherTo] = useState<number>(20);
-  const [budgetCap, setBudgetCap] = useState<number>(450000);
-  const [emergencyPriority, setEmergencyPriority] = useState<string>("CRITICAL");
-  const [emergencyDays, setEmergencyDays] = useState<number>(8);
-
-  const handlePresetTrigger = (disruption: Disruption) => {
-    if (isActing) return;
-    onTriggerReplan(disruption);
-  };
-
-  const handleCustomSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isActing) return;
-
-    let disruption: Disruption;
-    if (customKind === "road_closure") {
-      disruption = {
-        kind: "road_closure",
-        segment_id: selectedSegId,
-        days: Number(closureDays) || 10,
-      };
-    } else if (customKind === "weather") {
-      disruption = {
-        kind: "weather",
-        from_day: Number(weatherFrom) || 1,
-        to_day: Number(weatherTo) || 10,
-      };
-    } else if (customKind === "budget_change") {
-      disruption = {
-        kind: "budget_change",
-        new_cap_usd: Number(budgetCap) || 400000,
-      };
-    } else {
-      disruption = {
-        kind: "emergency",
-        segment_id: selectedSegId,
-        duration_days: Number(emergencyDays) || 7,
-        priority: emergencyPriority,
-      };
-    }
-
-    onTriggerReplan(disruption);
-  };
-
-  const handleNaturalSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!promptText.trim() || isActing) return;
     onTriggerReplan({ text: promptText.trim() });
+  };
+
+  const handleSelectSample = (text: string) => {
+    setPromptText(text);
   };
 
   // Metric comparisons when replan proposal is active
@@ -115,8 +87,8 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
     : 0;
 
   return (
-    <div className="scenario-panel-root" role="region" aria-label="Scenario Simulation Engine">
-      {/* Action Error Dismissible Banner */}
+    <div className="scenario-panel-root" role="region" aria-label="Nemotron Scenario Intelligence">
+      {/* Action Error Banner */}
       {actionError && (
         <div className="action-error-banner" role="alert">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -133,24 +105,42 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
         </div>
       )}
 
-      {/* Active Proposal View (When Replan is Pending Approval) */}
+      {/* Active Proposal View (Diagnosed by Nemotron & Solved by CP-SAT) */}
       {replan ? (
         <div className="results-proposal-card">
-          <div className="results-header">
-            <div className="results-badge-group">
-              <span className="badge-proposal-pending">⚠️ Replan Proposed</span>
-              <span className="disruption-badge">
-                Scenario: {replan.disruption.kind.replace("_", " ").toUpperCase()}
+          {/* Nemotron Diagnosis Header */}
+          <div className="nemotron-diagnosis-box">
+            <div className="diagnosis-top-row">
+              <span className="nemotron-tag">
+                <Sparkles size={13} />
+                Nemotron AI Diagnosis
+              </span>
+              <span className="solver-status-pill">
+                <Cpu size={12} />
+                OR-Tools CP-SAT Solved
               </span>
             </div>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-              Awaiting Approval
-            </span>
+
+            <div className="diagnosis-summary">
+              <span className="diagnosis-kind">
+                Detected Scenario: <strong>{replan.disruption.kind.replace("_", " ").toUpperCase()}</strong>
+              </span>
+              <span className="diagnosis-param">
+                {replan.disruption.kind === "road_closure" &&
+                  `Corridor ${replan.disruption.segment_id} locked down for ${replan.disruption.days} days`}
+                {replan.disruption.kind === "weather" &&
+                  `Precipitation constraint applied (Days ${replan.disruption.from_day}–${replan.disruption.to_day})`}
+                {replan.disruption.kind === "budget_change" &&
+                  `Capital ceiling capped at $${replan.disruption.new_cap_usd.toLocaleString()}`}
+                {replan.disruption.kind === "emergency" &&
+                  `Priority ${replan.disruption.priority} clearance on Segment ${replan.disruption.segment_id}`}
+              </span>
+            </div>
           </div>
 
           {/* 4-Metric Before vs After Comparison Grid */}
           <div className="metrics-comparison-grid">
-            {/* 1. Makespan / Total Duration */}
+            {/* 1. Makespan / Duration */}
             <div className="metric-card-box">
               <span className="metric-box-title">Total Duration</span>
               <div className="metric-box-values">
@@ -173,7 +163,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
 
             {/* 2. Direct Capital Cost */}
             <div className="metric-card-box">
-              <span className="metric-box-title">Total Project Cost</span>
+              <span className="metric-box-title">Total Cost</span>
               <div className="metric-box-values">
                 <span className="metric-old-val">
                   ${(replan.old_plan.total_cost_usd / 1000).toFixed(0)}k
@@ -193,7 +183,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
                 }`}
               >
                 {diffCost > 0
-                  ? `+$${(diffCost / 1000).toFixed(0)}k shift cost`
+                  ? `+$${(diffCost / 1000).toFixed(0)}k cost`
                   : diffCost < 0
                   ? `-$${Math.abs(diffCost / 1000).toFixed(0)}k`
                   : "$0 delta"}
@@ -277,7 +267,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
               onClick={onApprove}
             >
               <Check size={16} />
-              <span>{isActing ? "Committing Plan…" : "Approve & Set Baseline"}</span>
+              <span>{isActing ? "Committing Plan…" : "Approve & Commit Baseline"}</span>
             </button>
             <button
               id="btn-reject-replan"
@@ -286,294 +276,81 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
               onClick={onReject}
             >
               <X size={15} />
-              <span>Discard</span>
+              <span>Discard Proposal</span>
             </button>
           </div>
         </div>
       ) : (
-        /* Scenario Trigger & Input Forms (When no proposal is active) */
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Mode Tabs */}
-          <div className="scenario-nav-tabs">
-            <button
-              className={`scenario-nav-tab ${activeTab === "presets" ? "active" : ""}`}
-              onClick={() => setActiveTab("presets")}
-            >
-              <Zap size={13} />
-              <span>Presets</span>
-            </button>
-            <button
-              className={`scenario-nav-tab ${activeTab === "custom" ? "active" : ""}`}
-              onClick={() => setActiveTab("custom")}
-            >
-              <SlidersHorizontal size={13} />
-              <span>Custom Builder</span>
-            </button>
-            <button
-              className={`scenario-nav-tab ${activeTab === "natural" ? "active" : ""}`}
-              onClick={() => setActiveTab("natural")}
-            >
-              <Sparkles size={13} />
-              <span>Nemotron AI</span>
-            </button>
-          </div>
-
-          {/* Tab 1: Quick Preset Buttons */}
-          {activeTab === "presets" && (
-            <div className="presets-grid">
-              <button
-                className="scenario-card-btn"
-                disabled={isActing}
-                onClick={() =>
-                  handlePresetTrigger({
-                    kind: "road_closure",
-                    segment_id: firstSegmentId,
-                    days: 14,
-                  })
-                }
-              >
-                <div className="scenario-card-info">
-                  <span className="scenario-card-title">
-                    🚧 14-Day Emergency Closure ({firstSegmentId})
-                  </span>
-                  <span className="scenario-card-desc">
-                    Unplanned sinkhole forces complete right-of-way closure
-                  </span>
-                </div>
-                <span className="scenario-card-tag">Closure</span>
-              </button>
-
-              <button
-                className="scenario-card-btn"
-                disabled={isActing}
-                onClick={() =>
-                  handlePresetTrigger({
-                    kind: "weather",
-                    from_day: 10,
-                    to_day: 20,
-                  })
-                }
-              >
-                <div className="scenario-card-info">
-                  <span className="scenario-card-title">
-                    🌧️ Severe Rain & Flood Window (Day 10–20)
-                  </span>
-                  <span className="scenario-card-desc">
-                    Deep excavation halted due to ground saturation risk
-                  </span>
-                </div>
-                <span className="scenario-card-tag">Weather</span>
-              </button>
-
-              <button
-                className="scenario-card-btn"
-                disabled={isActing}
-                onClick={() =>
-                  handlePresetTrigger({
-                    kind: "budget_change",
-                    new_cap_usd: 460000,
-                  })
-                }
-              >
-                <div className="scenario-card-info">
-                  <span className="scenario-card-title">
-                    💰 Emergency $460k Capital Budget Cap
-                  </span>
-                  <span className="scenario-card-desc">
-                    Treasury reduction forces maximum co-trenching synergy
-                  </span>
-                </div>
-                <span className="scenario-card-tag">Fiscal</span>
-              </button>
-
-              <button
-                className="scenario-card-btn"
-                disabled={isActing}
-                onClick={() =>
-                  handlePresetTrigger({
-                    kind: "emergency",
-                    segment_id: secondSegmentId,
-                    duration_days: 8,
-                    priority: "CRITICAL",
-                  })
-                }
-              >
-                <div className="scenario-card-info">
-                  <span className="scenario-card-title">
-                    🚨 Gas Leak Priority Excavation ({secondSegmentId})
-                  </span>
-                  <span className="scenario-card-desc">
-                    High-priority hazard requires immediate corridor priority
-                  </span>
-                </div>
-                <span className="scenario-card-tag">Hazard</span>
-              </button>
+        /* Situation Dispatch Console (AI-First Interface) */
+        <div className="situation-console-wrapper">
+          <form className="situation-form" onSubmit={handleSubmit}>
+            <div className="console-header">
+              <div className="console-title-group">
+                <Sparkles size={15} color="var(--accent-purple)" />
+                <span className="console-title">Nemotron Situation Dispatch</span>
+              </div>
+              <span className="console-tag">Natural Language $\rightarrow$ Constraints</span>
             </div>
-          )}
 
-          {/* Tab 2: Structured Custom Builder Form */}
-          {activeTab === "custom" && (
-            <form className="structured-form" onSubmit={handleCustomSubmit}>
-              <div className="form-row">
-                <label className="form-label">Disruption Category:</label>
-                <select
-                  className="form-select"
-                  value={customKind}
-                  onChange={(e) => setCustomKind(e.target.value as any)}
-                  disabled={isActing}
-                >
-                  <option value="road_closure">🚧 Road Closure</option>
-                  <option value="weather">🌧️ Weather Window</option>
-                  <option value="budget_change">💰 Capital Budget Cap</option>
-                  <option value="emergency">🚨 Emergency Corridor Access</option>
-                </select>
-              </div>
+            <p className="console-subtitle">
+              Describe an unforeseen incident or city situation. Nemotron will analyze the issue,
+              formulate constraints, and re-optimize the coordinated schedule.
+            </p>
 
-              {(customKind === "road_closure" || customKind === "emergency") && (
-                <div className="form-row">
-                  <label className="form-label">Affected Street Segment:</label>
-                  <select
-                    className="form-select"
-                    value={selectedSegId}
-                    onChange={(e) => setSelectedSegId(e.target.value)}
+            <textarea
+              id="situation-input"
+              className="situation-textarea"
+              placeholder="e.g. Flood on Main Street halts pipe trenching for 14 days..."
+              value={promptText}
+              onChange={(e) => setPromptText(e.target.value)}
+              disabled={isActing}
+              rows={3}
+            />
+
+            {/* Quick Sample Incident Chips */}
+            <div className="sample-dispatches-section">
+              <span className="samples-label">Quick Incident Dispatches:</span>
+              <div className="sample-chips-row">
+                {SAMPLE_DISPATCH_PROMPTS.map((sample, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="sample-chip-btn"
+                    onClick={() => handleSelectSample(sample.text)}
                     disabled={isActing}
+                    title={sample.text}
                   >
-                    {segments.map((seg) => (
-                      <option key={seg.id} value={seg.id}>
-                        {seg.name} ({seg.id})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {customKind === "road_closure" && (
-                <div className="form-row">
-                  <label className="form-label">Closure Duration (Days):</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={120}
-                    value={closureDays}
-                    onChange={(e) => setClosureDays(Number(e.target.value))}
-                    disabled={isActing}
-                    className="form-input"
-                  />
-                </div>
-              )}
-
-              {customKind === "weather" && (
-                <div className="form-row-grid">
-                  <div className="form-row">
-                    <label className="form-label">Start Day:</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={weatherFrom}
-                      onChange={(e) => setWeatherFrom(Number(e.target.value))}
-                      disabled={isActing}
-                      className="form-input"
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label className="form-label">End Day:</label>
-                    <input
-                      type="number"
-                      min={weatherFrom + 1}
-                      value={weatherTo}
-                      onChange={(e) => setWeatherTo(Number(e.target.value))}
-                      disabled={isActing}
-                      className="form-input"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {customKind === "budget_change" && (
-                <div className="form-row">
-                  <label className="form-label">New Budget Cap (USD):</label>
-                  <input
-                    type="number"
-                    min={50000}
-                    step={10000}
-                    value={budgetCap}
-                    onChange={(e) => setBudgetCap(Number(e.target.value))}
-                    disabled={isActing}
-                    className="form-input"
-                  />
-                </div>
-              )}
-
-              {customKind === "emergency" && (
-                <div className="form-row-grid">
-                  <div className="form-row">
-                    <label className="form-label">Duration (Days):</label>
-                    <input
-                      type="number"
-                      min={1}
-                      value={emergencyDays}
-                      onChange={(e) => setEmergencyDays(Number(e.target.value))}
-                      disabled={isActing}
-                      className="form-input"
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label className="form-label">Priority:</label>
-                    <select
-                      className="form-select"
-                      value={emergencyPriority}
-                      onChange={(e) => setEmergencyPriority(e.target.value)}
-                      disabled={isActing}
-                    >
-                      <option value="CRITICAL">CRITICAL</option>
-                      <option value="HIGH">HIGH</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="btn-simulate-custom"
-                disabled={isActing}
-              >
-                {isActing ? "Solving with CP-SAT…" : "Simulate Scenario"}
-              </button>
-            </form>
-          )}
-
-          {/* Tab 3: Natural Language Disruption Form */}
-          {activeTab === "natural" && (
-            <form className="nl-form-container" onSubmit={handleNaturalSubmit}>
-              <label htmlFor="prompt-input" className="form-label">
-                Describe Disruption in Plain English:
-              </label>
-              <textarea
-                id="prompt-input"
-                className="nl-textarea"
-                placeholder="e.g. Flood on Main Street halts pipe trenching for 10 days"
-                value={promptText}
-                onChange={(e) => setPromptText(e.target.value)}
-                disabled={isActing}
-              />
-              <div className="nl-submit-row">
-                <button
-                  type="submit"
-                  disabled={isActing || !promptText.trim()}
-                  className="btn-parse-nemotron"
-                >
-                  <Sparkles size={14} />
-                  <span>{isActing ? "Translating & Re-optimizing…" : "Parse & Replan"}</span>
-                </button>
+                    <span>{sample.icon}</span>
+                    <span>{sample.label}</span>
+                  </button>
+                ))}
               </div>
-            </form>
-          )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={isActing || !promptText.trim()}
+              className="btn-analyze-situation"
+            >
+              {isActing ? (
+                <>
+                  <Zap size={14} className="spinning-icon" />
+                  <span>Nemotron Analyzing & Re-Solving…</span>
+                </>
+              ) : (
+                <>
+                  <Send size={14} />
+                  <span>Analyze Situation & Re-Optimize</span>
+                </>
+              )}
+            </button>
+          </form>
 
           {/* Active Baseline Status Card */}
           {plan && (
             <div className="active-baseline-card">
               <div className="baseline-header">
-                <span className="baseline-title">Active Baseline Plan</span>
+                <span className="baseline-title">Current Operating Baseline</span>
                 <span className="baseline-status-pill">{plan.status.toUpperCase()}</span>
               </div>
               <div className="baseline-stats-row">
