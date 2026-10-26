@@ -1,15 +1,18 @@
 import React from "react";
-import type { Plan, Project } from "../types";
+import type { Plan, Project, ReplanResult } from "../types";
+import { GanttChart } from "./GanttChart";
 
 interface TimelineRegionProps {
   project: Project | null;
   plan: Plan | null;
+  replan?: ReplanResult | null;
   children?: React.ReactNode;
 }
 
 export const TimelineRegion: React.FC<TimelineRegionProps> = ({
   project,
   plan,
+  replan,
   children,
 }) => {
   const packages = project?.packages ?? [];
@@ -19,7 +22,7 @@ export const TimelineRegion: React.FC<TimelineRegionProps> = ({
       <div className="region-header">
         <div className="region-title-group">
           <span className="region-icon">📊</span>
-          <h2>Schedule Timeline</h2>
+          <h2>Schedule Timeline & Gantt</h2>
         </div>
         <div className="region-header-meta">
           {plan ? (
@@ -37,35 +40,15 @@ export const TimelineRegion: React.FC<TimelineRegionProps> = ({
       <div id="timeline-slot" className="region-content timeline-slot">
         {children ? (
           children
+        ) : packages.length > 0 ? (
+          <GanttChart project={project} plan={plan} replan={replan} />
         ) : (
           <div className="slot-placeholder timeline-placeholder">
             <div className="placeholder-banner">
               <span className="status-dot green"></span>
-              <span>Timeline Slot Ready — Gantt / Schedule View (Issue #5)</span>
+              <span>Timeline Slot Ready — Gantt / Schedule View (Issue #8)</span>
             </div>
-
-            <div className="work-packages-stream">
-              {packages.map((pkg) => (
-                <div key={pkg.id} className="package-row">
-                  <div className="package-info">
-                    <span className={`utility-badge utility-${pkg.utility}`}>
-                      {pkg.utility}
-                    </span>
-                    <span className="package-name">{pkg.name}</span>
-                  </div>
-                  <div className="package-track">
-                    <div
-                      className="package-bar-stub"
-                      style={{
-                        width: `${Math.min(100, Math.max(15, pkg.duration_days * 5))}%`,
-                      }}
-                    >
-                      <span className="bar-label">{pkg.duration_days}d</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="no-segments-hint">No work packages loaded in current project.</p>
           </div>
         )}
       </div>

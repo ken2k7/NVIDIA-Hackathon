@@ -1,0 +1,472 @@
+/* InfraSync Gantt Chart & Timeline Styling */
+
+.gantt-root {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+}
+
+/* Gantt Toolbar */
+.gantt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gantt-stats-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.gantt-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.gantt-badge.highlight {
+  border-color: rgba(118, 185, 0, 0.35);
+  background: rgba(118, 185, 0, 0.1);
+  color: var(--accent-nvidia);
+}
+
+.gantt-badge.synergy {
+  border-color: rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+}
+
+.gantt-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-mode-selector {
+  display: inline-flex;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 2px;
+}
+
+.view-mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-mode-btn:hover {
+  color: var(--text-main);
+}
+
+.view-mode-btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 600;
+}
+
+.view-mode-btn.active.diff-mode {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--accent-amber);
+}
+
+/* Timeline Canvas & Grid */
+.gantt-canvas {
+  position: relative;
+  width: 100%;
+  background: rgba(10, 12, 16, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.gantt-inner-container {
+  min-width: 650px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Time Scale Header (Day Ticks) */
+.gantt-time-scale {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: center;
+  background: rgba(18, 22, 32, 0.95);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.gantt-column-title {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gantt-ticks-track {
+  position: relative;
+  height: 36px;
+  width: 100%;
+}
+
+.gantt-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.gantt-tick-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.gantt-tick-line {
+  width: 1px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-top: 2px;
+}
+
+/* Rows Container */
+.gantt-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.gantt-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: center;
+  min-height: 52px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.gantt-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.gantt-row.selected {
+  background: rgba(118, 185, 0, 0.06);
+}
+
+/* Package Info Cell (Left Column) */
+.gantt-package-cell {
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.gantt-package-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.gantt-package-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gantt-package-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.gantt-segment-badge {
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* Bar Track (Right Column) */
+.gantt-bar-track {
+  position: relative;
+  height: 100%;
+  min-height: 52px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Vertical Gridlines across track */
+.gantt-gridline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.gantt-gridline.major {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Task Bar */
+.gantt-task-bar {
+  position: absolute;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.gantt-task-bar:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  z-index: 5;
+}
+
+.gantt-task-bar.selected {
+  outline: 2px solid var(--accent-nvidia);
+  outline-offset: 2px;
+}
+
+/* Utility Colors for Bars */
+.gantt-task-bar.utility-water {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: 1px solid rgba(96, 165, 250, 0.5);
+  color: #eff6ff;
+}
+
+.gantt-task-bar.utility-fiber {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  color: #f5f3ff;
+}
+
+.gantt-task-bar.utility-drainage {
+  background: linear-gradient(135deg, #0891b2, #0e7490);
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  color: #ecfeff;
+}
+
+.gantt-task-bar.utility-road {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  color: #fffbeb;
+}
+
+/* Shared-Trench Co-Location Glow */
+.gantt-task-bar.is-cotrenched {
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.2);
+  border-color: #c084fc;
+}
+
+.cotrench-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #f3e8ff;
+  border: 1px solid rgba(192, 132, 252, 0.5);
+}
+
+.bar-day-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Diff Overlay Ghost Bar (Old Plan Position) */
+.gantt-ghost-bar {
+  position: absolute;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ghost-label {
+  opacity: 0.8;
+}
+
+/* Shift Connector Arrow in Diff View */
+.shift-indicator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+
+.shift-indicator-badge.shift-delayed {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.shift-indicator-badge.shift-advanced {
+  background: rgba(118, 185, 0, 0.25);
+  color: var(--accent-nvidia);
+  border: 1px solid rgba(118, 185, 0, 0.4);
+}
+
+.shift-indicator-badge.shift-stable {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+/* Gantt Legend */
+.gantt-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.gantt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gantt-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* Inspection Drawer */
+.gantt-task-inspector {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeIn 0.2s ease;
+}
+
+.inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inspector-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inspector-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+}
+
+.inspector-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.inspector-metric-card {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.inspector-metric-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.inspector-metric-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  font-family: var(--font-mono);
+}
+
+.inspector-metric-val.highlight {
+  color: var(--accent-nvidia);
+}

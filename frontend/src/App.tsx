@@ -81,7 +81,7 @@ export default function App(): React.ReactElement {
           <MapRegion project={project} replan={replan} />
 
           {/* Region 2: Timeline View (CP-SAT Gantt) */}
-          <TimelineRegion project={project} plan={plan} />
+          <TimelineRegion project={project} plan={plan} replan={replan} />
         </div>
 
         {/* Right Secondary Column: Autonomous Simulation & Decision Engine */}
