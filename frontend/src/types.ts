@@ -1,35 +1,38 @@
-// Data shapes shared across the frontend. These MUST match the backend's
-// Pydantic schemas (backend/app/models/schemas.py) field-for-field, because
-// the backend sends JSON in exactly this shape. JSON keys are snake_case.
-//
-// Vocabulary: District = the whole portfolio (container); Project = one job (PRJ_xx).
+// Data shapes shared across the frontend. These match the backend's
+// Pydantic schemas (backend/app/models/schemas.py) field-for-field, while supporting
+// both District (backend portfolio contract) and Project (frontend application state).
+// JSON keys are snake_case.
 
-export type Utility = "road" | "drainage" | "water" | "fiber";
+export type Utility = "road" | "drainage" | "water" | "fiber" | string;
 
 export interface Segment {
   id: string;
   name: string;
-  coords: number[][]; // [[lat, lng], ...] polyline for the map
-  traffic_weight: number; // 0–100
-  moratorium_until_day: number; // no pavement cut before this day (0 = none)
-  corridor_group: string | null; // same group = parallel routes
+  coords?: [number, number][]; // [[lat, lng], ...] polyline for the map
+  traffic_weight?: number; // 0–100 (or 1-10 disruption sensitivity)
+  moratorium_until_day?: number; // no pavement cut before this day (0 = none)
+  corridor_group?: string | null; // same group = parallel routes
 }
 
-export interface Project {
+export interface WorkPackage {
   id: string;
   name: string;
   utility: Utility;
   segment_id: string;
   duration_days: number;
-  cost_estimate_usd: number; // engineer's ESTIMATE, not a final price
-  crew_type: string;
-  crews_needed: number;
-  depends_on: string[]; // ids of projects that must finish first
-  earliest_start_day: number; // funding window start (0 = anytime)
-  latest_finish_day: number; // funding/deadline window end (0 = none)
-  target_start_day: number; // preferred start
-  shift_cost_per_day: number; // $ per day moved off target_start_day
+  cost_estimate_usd?: number; // pre-tender engineer's ESTIMATE
+  cost_usd?: number;
+  crew_type?: string;
+  crews_needed?: number;
+  depends_on?: string[]; // ids of projects that must finish first
+  earliest_start_day?: number; // funding window start (0 = anytime)
+  latest_finish_day?: number; // funding/deadline window end (0 = none)
+  target_start_day?: number; // preferred start
+  shift_cost_per_day?: number; // $ per day moved off target_start_day
 }
+
+// In the backend schema, one construction job is called Project
+export type ProjectJob = WorkPackage;
 
 export interface Crew {
   type: string;
@@ -37,47 +40,74 @@ export interface Crew {
 }
 
 export interface CoLocation {
-  project_a: string;
-  project_b: string;
+  project_a?: string;
+  project_b?: string;
+  package_a?: string;
+  package_b?: string;
   compatible: boolean;
   synergy_cost_usd: number;
 }
 
 export interface ScheduledTask {
-  project_id: string;
+  project_id?: string;
+  work_package_id: string;
   start_day: number;
   end_day: number;
   shared_trench_with: string | null;
 }
 
+export type PlanStatus = "draft" | "approved" | "rejected";
+
 export interface Plan {
   id: string;
-  status: "draft" | "approved" | "rejected";
+  status: PlanStatus;
   tasks: ScheduledTask[];
+  total_cost_usd: number;
   total_days: number; // makespan
   closure_days: number; // traffic-weighted closure days
-  synergy_captured_usd: number;
-  shift_penalty_usd: number;
+  synergy_captured_usd?: number;
+  shift_penalty_usd?: number;
   dig_once_savings_usd: number;
   dig_once_savings_closure_days: number;
-  objective_z: number;
+  objective_z?: number;
 }
 
 export interface District {
   segments: Segment[];
-  projects: Project[];
-  crews: Crew[];
-  colocations: CoLocation[];
-  total_budget_usd: number;
-  deadline_day: number;
-  max_closure: number;
-  plan: Plan | null; // computed by the solver (null in the raw dataset)
+  projects?: WorkPackage[];
+  packages?: WorkPackage[];
+  crews?: Crew[];
+  colocations?: CoLocation[];
+  total_budget_usd?: number;
+  deadline_day?: number;
+  max_closure?: number;
+  plan?: Plan | null;
 }
 
-// A tagged union: the "kind" field tells you which shape you have.
+// Frontend application container state (with packages guaranteed)
+export interface Project extends District {
+  packages: WorkPackage[];
+  projects?: WorkPackage[];
+}
+
+// Tagged union for disruption scenarios
 export type Disruption =
   | { kind: "road_closure"; segment_id: string; days: number }
   | { kind: "budget_change"; new_cap_usd: number }
+  | { kind: "weather"; from_day: number; to_day: number }
   | { kind: "weather_stoppage"; from_day: number; to_day: number }
   | { kind: "weather_slowdown"; from_day: number; to_day: number; efficiency_loss_pct: number }
-  | { kind: "emergency"; segment_id: string; duration_days: number; priority: "high" | "medium" | "low" };
+  | { kind: "emergency"; segment_id: string; duration_days: number; priority: "high" | "medium" | "low" | string };
+
+export interface SourceCitation {
+  title: string;
+  url: string;
+}
+
+export interface ReplanResult {
+  disruption: Disruption;
+  old_plan: Plan;
+  new_plan: Plan;
+  explanation: string;
+  sources?: SourceCitation[];
+}
