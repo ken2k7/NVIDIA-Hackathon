@@ -18,8 +18,12 @@ class Settings(BaseSettings):
     # only let our frontend call the backend if the backend allows this origin.
     cors_origins: List[str] = ["http://localhost:5173"]
 
-    # Not used yet; here so the plumbing exists when we add the AI step.
+    # Nebius Token Factory (NVIDIA Nemotron). If the key is blank, the AI calls
+    # fall back to deterministic templates, so the app runs without credentials.
     nebius_api_key: str = ""
+    nebius_base_url: str = "https://api.tokenfactory.nebius.com/v1/"
+    # CONFIRM the exact id against the live Token Factory catalog before relying on it.
+    nebius_model: str = "nvidia/Nemotron-3-Super-120b-a12b"
 
 
 # One shared instance the rest of the app imports.

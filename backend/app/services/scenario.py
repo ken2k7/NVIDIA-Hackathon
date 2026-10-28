@@ -26,6 +26,7 @@ from app.models.schemas import (
     WeatherSlowdown,
     WeatherStoppage,
 )
+from app.services.agent import explain_plan
 from app.services.optimizer import solve
 
 # ---- in-memory session state -------------------------------------------------
@@ -82,25 +83,6 @@ def _disruption_to_scenario(district: District, d: Disruption):
     return modified, windows
 
 
-def _explain(d: Disruption, old: Plan, new: Plan) -> str:
-    """A grounded, numbers-only explanation (no invented facts)."""
-    def delta(x):
-        return f"+{x}" if x >= 0 else f"{x}"
-
-    dt = new.total_days - old.total_days
-    dc = new.closure_days - old.closure_days
-    kind = d.kind.replace("_", " ")
-    return (
-        f"Applied a '{kind}' scenario and re-optimised. "
-        f"Makespan {delta(dt)} day(s) (now {new.total_days}); "
-        f"traffic-weighted closure {delta(dc)} (now {new.closure_days}). "
-        f"Dig-once coordination still captures ${new.dig_once_savings_usd:,} and "
-        f"{new.dig_once_savings_closure_days} road-days of savings. "
-        f"All hard constraints (precedence, crew limits, moratoria, corridors) remain satisfied. "
-        f"All figures are pre-tender estimates."
-    )
-
-
 def replan(district: District, disruption: Disruption, old_plan: Optional[Plan] = None) -> ReplanResult:
     if old_plan is None:
         old_plan = get_current_plan(district)
@@ -131,7 +113,7 @@ def replan(district: District, disruption: Disruption, old_plan: Optional[Plan] 
         disruption=disruption,
         old_plan=old_plan,
         new_plan=new_plan,
-        explanation=_explain(disruption, old_plan, new_plan),
+        explanation=explain_plan(disruption, old_plan, new_plan),
         sources=[],
     )
 
