@@ -1,8 +1,9 @@
 """InfraSync backend — application entry point.
 
-This creates the FastAPI app and defines:
+Endpoints:
   GET /health   -> a simple "am I alive?" check
-  GET /project  -> the full validated district dataset (loaded from district.json)
+  GET /project  -> the full validated district dataset (from district.json)
+  GET /plan     -> the CP-SAT solver's schedule for that district
 
 Run it from the backend/ folder with:
   uvicorn app.main:app --reload --port 8000
@@ -12,8 +13,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.models.schemas import District
+from app.models.schemas import District, Plan
 from app.services.dataset import load_district
+from app.services.optimizer import solve
 
 # The application object. "title" shows up in the auto-generated docs page.
 app = FastAPI(title="InfraSync API")
@@ -38,8 +40,12 @@ def health():
 def get_project():
     """Return the full synthetic district: segments, projects, crews, co-locations.
 
-    'plan' is null here — the deterministic solver (issue #2) will compute and
-    attach the schedule later. 'response_model=District' makes FastAPI validate
-    the output against our schema before sending it.
+    'plan' is null here — use /plan to compute the schedule.
     """
     return load_district()
+
+
+@app.get("/plan", response_model=Plan)
+def get_plan():
+    """Run the deterministic CP-SAT solver on the district and return the schedule."""
+    return solve(load_district())
