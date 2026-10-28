@@ -142,3 +142,20 @@ Disruption = Annotated[
     Union[RoadClosure, BudgetChange, WeatherStoppage, WeatherSlowdown, Emergency],
     Field(discriminator="kind"),
 ]
+
+
+# ---------------------------------------------------------------------------
+# Replan result (returned by POST /replan)
+# ---------------------------------------------------------------------------
+
+class SourceCitation(BaseModel):
+    title: str
+    url: str
+
+
+class ReplanResult(BaseModel):
+    disruption: Disruption
+    old_plan: Plan
+    new_plan: Plan
+    explanation: str
+    sources: List[SourceCitation] = []
