@@ -1,10 +1,12 @@
 """Deterministic scheduler — turns a District into a Plan using OR-Tools CP-SAT.
 
-Slice 1: produce ANY valid schedule that respects the hard constraints
-(precedence, funding windows, pavement moratorium, crew capacity) and finishes
-as early as possible (minimize makespan). Parallel corridors, co-trenching, and
-the full normalized objective (Z) come in later slices.
+Slices 1-2: produce a valid schedule respecting the hard constraints
+(precedence, funding windows, pavement moratorium, crew capacity, parallel
+corridors) and finishing as early as possible (minimize makespan). Co-trenching
+and the full normalized objective (Z) come in later slices.
 """
+
+from collections import defaultdict
 
 from ortools.sat.python import cp_model
 
@@ -57,6 +59,20 @@ def solve(district: District) -> Plan:
                 [p.crews_needed for p in members],
                 crew.capacity,
             )
+
+    # 6b. Parallel corridors: segments sharing a corridor_group are alternate
+    #     routes, so work on two DIFFERENT segments in the group can't run at the
+    #     same time (jobs on the SAME segment may still overlap — the co-trench case).
+    corridors = defaultdict(list)
+    for p in district.projects:
+        seg = segment_by_id.get(p.segment_id)
+        if seg and seg.corridor_group:
+            corridors[seg.corridor_group].append(p)
+    for members in corridors.values():
+        for i, a in enumerate(members):
+            for b in members[i + 1:]:
+                if a.segment_id != b.segment_id:
+                    model.AddNoOverlap([intervals[a.id], intervals[b.id]])
 
     # 7. Makespan = the latest finish day across all projects. Minimize it.
     makespan = model.NewIntVar(0, horizon, "makespan")
