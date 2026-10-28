@@ -1,56 +1,83 @@
 """Deterministic scheduler — turns a District into a Plan using OR-Tools CP-SAT.
 
-Slices 1-2: produce a valid schedule respecting the hard constraints
-(precedence, funding windows, pavement moratorium, crew capacity, parallel
-corridors) and finishing as early as possible (minimize makespan). Co-trenching
-and the full normalized objective (Z) come in later slices.
+This is the full v1 solver (slices 1-3). It respects all six HARD constraints:
+  precedence, funding windows, pavement moratorium, crew capacity,
+  parallel corridors, and engineering compatibility (incompatible pairs can
+  never co-trench).
+It DECIDES co-trenching: for each compatible co-location pair a boolean y says
+"share one trench", which (a) forces the two digs to start together and (b)
+captures that pair's synergy saving. The objective is money-based —
+
+    minimize  total_shift_penalty - total_synergy_captured  (dollars)
+              + MAKESPAN_WEIGHT * makespan                   (compactness tie-breaker)
+
+so a pair is co-trenched only when its synergy outweighs the cost of shifting the
+jobs together (the "sweet spot" is taken, the "low-synergy trap" is declined).
+
+Dig-once savings are the synergy dollars captured plus, per co-trenched pair, the
+shorter dig's road-closure days that no longer close the street separately.
+
+NOTE: MAKESPAN_WEIGHT and the normalized `objective_z` weights are tunables —
+revisit them when tuning the demo (see AGENTS.md).
 """
 
 from collections import defaultdict
+from dataclasses import dataclass
 
 from ortools.sat.python import cp_model
 
 from app.models.schemas import District, Plan, ScheduledTask
 
+# Dollars that one extra makespan-day "costs" in the objective. Small enough that
+# the co-trench economics (tens/hundreds of $k) dominate the schedule shape, big
+# enough to break ties toward a compact schedule.
+MAKESPAN_WEIGHT = 100
 
-def solve(district: District) -> Plan:
+
+@dataclass
+class _Result:
+    """Raw output of one solver run (before we package it into a Plan)."""
+    starts: dict          # project_id -> start day
+    ends: dict            # project_id -> end day
+    makespan: int
+    synergy_captured: int
+    shift_penalty: int
+    cotrenched: list      # list of (a, b) pairs actually co-trenched
+
+
+def _solve_once(district: District, allow_cotrench: bool) -> _Result:
     model = cp_model.CpModel()
 
-    # 1. Horizon: a safe upper bound on the last day anything could finish.
-    #    (The latest allowed finish, or everything done back-to-back — whichever is larger.)
+    # Horizon: a safe upper bound on the last possible finish day.
     total_duration = sum(p.duration_days for p in district.projects)
     latest_window = max((p.latest_finish_day for p in district.projects), default=0)
     horizon = max(district.deadline_day, latest_window, total_duration)
 
-    # 2. One interval per project. `start` and `end` are the DECISION VARIABLES
-    #    the solver fills in; the interval ties them together with the duration.
+    # One interval per project (start/end are the decision variables).
     starts, ends, intervals = {}, {}, {}
     for p in district.projects:
-        start = model.NewIntVar(0, horizon, f"start_{p.id}")
-        end = model.NewIntVar(0, horizon, f"end_{p.id}")
-        interval = model.NewIntervalVar(start, p.duration_days, end, f"iv_{p.id}")
-        starts[p.id], ends[p.id], intervals[p.id] = start, end, interval
+        s = model.NewIntVar(0, horizon, f"start_{p.id}")
+        e = model.NewIntVar(0, horizon, f"end_{p.id}")
+        intervals[p.id] = model.NewIntervalVar(s, p.duration_days, e, f"iv_{p.id}")
+        starts[p.id], ends[p.id] = s, e
 
-    segment_by_id = {s.id: s for s in district.segments}
+    segment_by_id = {seg.id: seg for seg in district.segments}
 
     for p in district.projects:
-        # 3. Precedence: every dependency must finish before p starts.
+        # Precedence (+ no cure lag in v1).
         for dep_id in p.depends_on:
             model.Add(ends[dep_id] <= starts[p.id])
-
-        # 4. Funding windows (0 means "no bound").
+        # Funding windows.
         if p.earliest_start_day > 0:
             model.Add(starts[p.id] >= p.earliest_start_day)
         if p.latest_finish_day > 0:
             model.Add(ends[p.id] <= p.latest_finish_day)
-
-        # 5. Moratorium: a cut (excavation) can't start before the fresh pavement reopens.
+        # Moratorium: a cut (excavation) can't start before fresh pavement reopens.
         seg = segment_by_id.get(p.segment_id)
         if seg and seg.moratorium_until_day > 0 and p.crew_type == "excavation":
             model.Add(starts[p.id] >= seg.moratorium_until_day)
 
-    # 6. Crew capacity: at any moment, overlapping jobs of one crew type can't
-    #    demand more crews than that pool has.
+    # Crew capacity.
     for crew in district.crews:
         members = [p for p in district.projects if p.crew_type == crew.type]
         if members:
@@ -60,9 +87,8 @@ def solve(district: District) -> Plan:
                 crew.capacity,
             )
 
-    # 6b. Parallel corridors: segments sharing a corridor_group are alternate
-    #     routes, so work on two DIFFERENT segments in the group can't run at the
-    #     same time (jobs on the SAME segment may still overlap — the co-trench case).
+    # Parallel corridors: work on two DIFFERENT segments of the same corridor
+    # group can't overlap (jobs on the SAME segment still may — co-trench case).
     corridors = defaultdict(list)
     for p in district.projects:
         seg = segment_by_id.get(p.segment_id)
@@ -74,39 +100,116 @@ def solve(district: District) -> Plan:
                 if a.segment_id != b.segment_id:
                     model.AddNoOverlap([intervals[a.id], intervals[b.id]])
 
-    # 7. Makespan = the latest finish day across all projects. Minimize it.
+    # Co-trenching: a boolean per COMPATIBLE pair. Incompatible pairs get no
+    # variable, so they can never capture synergy (engineering-incompat edge case).
+    cotrench = []            # (a, b, y)
+    synergy_terms = []       # dollars captured
+    synergy_by_pair = {}
+    for c in district.colocations:
+        synergy_by_pair[(c.project_a, c.project_b)] = c.synergy_cost_usd
+        if c.compatible and allow_cotrench:
+            y = model.NewBoolVar(f"y_{c.project_a}_{c.project_b}")
+            # Co-trenched => the two digs start on the same day (one shared trench).
+            model.Add(starts[c.project_a] == starts[c.project_b]).OnlyEnforceIf(y)
+            cotrench.append((c.project_a, c.project_b, y))
+            synergy_terms.append(c.synergy_cost_usd * y)
+
+    # Shift penalty: |start - target| * cost_per_day, summed over projects.
+    shift_terms = []
+    for p in district.projects:
+        if p.shift_cost_per_day > 0 and p.target_start_day > 0:
+            dev = model.NewIntVar(0, horizon, f"dev_{p.id}")
+            model.AddAbsEquality(dev, starts[p.id] - p.target_start_day)
+            shift_terms.append(p.shift_cost_per_day * dev)
+
     makespan = model.NewIntVar(0, horizon, "makespan")
     model.AddMaxEquality(makespan, [ends[p.id] for p in district.projects])
-    model.Minimize(makespan)
 
-    # 8. Solve (cap the search at 10s so a pathological input can't hang the API).
+    model.Minimize(sum(shift_terms) - sum(synergy_terms) + MAKESPAN_WEIGHT * makespan)
+
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = 10.0
     status = solver.Solve(model)
     if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
-        raise ValueError(
-            f"No feasible schedule found (solver status: {solver.StatusName(status)})"
-        )
+        raise ValueError(f"No feasible schedule (status {solver.StatusName(status)})")
 
-    # 9. Read the solver's answers back out into a Plan.
+    start_vals = {p.id: solver.Value(starts[p.id]) for p in district.projects}
+    end_vals = {p.id: solver.Value(ends[p.id]) for p in district.projects}
+    cotrenched = [(a, b) for (a, b, y) in cotrench if solver.Value(y) == 1]
+    synergy_captured = sum(synergy_by_pair[(a, b)] for (a, b) in cotrenched)
+    shift_penalty = sum(
+        p.shift_cost_per_day * abs(start_vals[p.id] - p.target_start_day)
+        for p in district.projects
+        if p.shift_cost_per_day > 0 and p.target_start_day > 0
+    )
+    return _Result(
+        starts=start_vals,
+        ends=end_vals,
+        makespan=solver.Value(makespan),
+        synergy_captured=int(synergy_captured),
+        shift_penalty=int(shift_penalty),
+        cotrenched=cotrenched,
+    )
+
+
+def _closure(district: District, starts: dict, ends: dict) -> tuple[int, int]:
+    """Return (traffic-weighted closure days, raw closure days) for a schedule.
+
+    A segment is "closed" on any day a project on it is active. We take the UNION
+    of its projects' days so co-trenched overlaps aren't double-counted.
+    """
+    proj_seg = {p.id: p.segment_id for p in district.projects}
+    seg_days: dict = defaultdict(set)
+    for pid in starts:
+        for day in range(starts[pid], ends[pid]):
+            seg_days[proj_seg[pid]].add(day)
+    tw = {seg.id: seg.traffic_weight for seg in district.segments}
+    weighted = int(sum(len(days) * tw.get(sid, 0) for sid, days in seg_days.items()))
+    raw = int(sum(len(days) for days in seg_days.values()))
+    return weighted, raw
+
+
+def solve(district: District) -> Plan:
+    coord = _solve_once(district, allow_cotrench=True)
+    coord_closure, _ = _closure(district, coord.starts, coord.ends)
+
+    # Road-closure days saved by sharing a trench: for each co-trenched pair, the
+    # shorter dig's days no longer close the street separately.
+    dur = {p.id: p.duration_days for p in district.projects}
+    closure_days_saved = sum(min(dur[a], dur[b]) for (a, b) in coord.cotrenched)
+
+    # Which project shares a trench with which (for the timeline's 🔗 markers).
+    shared: dict = {}
+    for (a, b) in coord.cotrenched:
+        shared[a], shared[b] = b, a
+
     tasks = [
         ScheduledTask(
             project_id=p.id,
-            start_day=solver.Value(starts[p.id]),
-            end_day=solver.Value(ends[p.id]),
-            shared_trench_with=None,  # co-trenching comes in a later slice
+            start_day=coord.starts[p.id],
+            end_day=coord.ends[p.id],
+            shared_trench_with=shared.get(p.id),
         )
         for p in district.projects
     ]
+
+    # Normalized objective score (for display). Weights are all 1 for now.
+    z = (
+        coord.makespan / district.deadline_day
+        - coord.synergy_captured / district.total_budget_usd
+        + coord.shift_penalty / district.total_budget_usd
+        + coord_closure / district.max_closure
+    )
+
     return Plan(
         id="plan-cpsat-v1",
         status="draft",
         tasks=tasks,
-        total_days=solver.Value(makespan),
-        closure_days=0,              # these come in later slices
-        synergy_captured_usd=0,
-        shift_penalty_usd=0,
-        dig_once_savings_usd=0,
-        dig_once_savings_closure_days=0,
-        objective_z=0.0,
+        total_days=coord.makespan,
+        closure_days=coord_closure,
+        synergy_captured_usd=coord.synergy_captured,
+        shift_penalty_usd=coord.shift_penalty,
+        dig_once_savings_usd=coord.synergy_captured,                 # vs 0-synergy baseline
+        dig_once_savings_closure_days=closure_days_saved,            # road-days saved by co-trenching
+        objective_z=round(z, 4),
     )
