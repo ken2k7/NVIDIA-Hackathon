@@ -45,7 +45,7 @@ class _Result:
     cotrenched: list      # list of (a, b) pairs actually co-trenched
 
 
-def _solve_once(district: District, allow_cotrench: bool) -> _Result:
+def _solve_once(district: District, allow_cotrench: bool, blocked_windows=None) -> _Result:
     model = cp_model.CpModel()
 
     # Horizon: a safe upper bound on the last possible finish day.
@@ -99,6 +99,18 @@ def _solve_once(district: District, allow_cotrench: bool) -> _Result:
             for b in members[i + 1:]:
                 if a.segment_id != b.segment_id:
                     model.AddNoOverlap([intervals[a.id], intervals[b.id]])
+
+    # Disruption windows (from a replan scenario): forbid affected projects from
+    # running during [start, end). seg_id=None means all segments (e.g. weather).
+    for (seg_id, w_start, w_end) in (blocked_windows or []):
+        w_start = max(0, w_start)
+        w_end = min(horizon, w_end)
+        if w_end <= w_start:
+            continue
+        window = model.NewIntervalVar(w_start, w_end - w_start, w_end, f"block_{seg_id}_{w_start}")
+        for p in district.projects:
+            if seg_id is None or p.segment_id == seg_id:
+                model.AddNoOverlap([intervals[p.id], window])
 
     # Co-trenching: a boolean per COMPATIBLE pair. Incompatible pairs get no
     # variable, so they can never capture synergy (engineering-incompat edge case).
@@ -169,8 +181,8 @@ def _closure(district: District, starts: dict, ends: dict) -> tuple[int, int]:
     return weighted, raw
 
 
-def solve(district: District) -> Plan:
-    coord = _solve_once(district, allow_cotrench=True)
+def solve(district: District, blocked_windows=None) -> Plan:
+    coord = _solve_once(district, allow_cotrench=True, blocked_windows=blocked_windows)
     coord_closure, _ = _closure(district, coord.starts, coord.ends)
 
     # Road-closure days saved by sharing a trench: for each co-trenched pair, the
