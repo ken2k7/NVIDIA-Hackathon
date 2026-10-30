@@ -80,6 +80,7 @@ class Plan(BaseModel):
     status: Literal["draft", "approved", "rejected"]
     tasks: List[ScheduledTask]
     total_days: int                        # makespan (the 'duration' term)
+    total_cost_usd: int                    # sum of project cost estimates (constant programme cost)
     closure_days: int                      # Σ traffic-weighted segment-closure days
     synergy_captured_usd: int              # total co-trench savings actually captured
     shift_penalty_usd: int                 # total shift penalties paid

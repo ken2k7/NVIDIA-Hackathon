@@ -4,4 +4,5 @@ uvicorn[standard]>=0.30   # the server that actually runs the FastAPI app
 pydantic>=2.7             # validates/serialises our data shapes (Segment, WorkPackage, ...)
 pydantic-settings>=2.3    # reads configuration (like API keys) from a .env file
 ortools>=9.10             # Google OR-Tools: the CP-SAT constraint solver (the scheduler core)
+openai>=1.0               # OpenAI-compatible client used to call Nemotron on Token Factory
 openai>=1.0               # OpenAI-compatible client for Nebius Token Factory (Nemotron)

@@ -130,7 +130,7 @@ def parse_text(text: str, district: District) -> Disruption:
         (s for s in district.segments if s.id.lower() in t or s.name.lower() in t),
         district.segments[0],
     )
-    m = re.search(r"(\d+)\s*day", t)
+    m = re.search(r"(\d+)\s*-?\s*day", t)   # matches "14 days", "14-day", "14day"
     days = int(m.group(1)) if m else 10
 
     if any(w in t for w in ("rain", "weather", "storm", "flood", "monsoon")):

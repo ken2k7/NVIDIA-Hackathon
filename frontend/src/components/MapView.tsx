@@ -276,11 +276,11 @@ export const MapView: React.FC<MapViewProps> = ({
           scrollWheelZoom={true}
           className="leaflet-map-root"
         >
-          {/* CartoDB Dark Matter tile layer for cohesive dark aesthetics */}
+          {/* Esri dark-gray canvas — free, no API key, keeps the dark aesthetic */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-            maxZoom={19}
+            attribution="Tiles &copy; Esri"
+            url="https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+            maxZoom={16}
           />
 
           <AutoFitBounds bounds={allBounds} />

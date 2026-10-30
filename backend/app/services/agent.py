@@ -66,9 +66,15 @@ def explain_plan(disruption: Disruption, old: Plan, new: Plan) -> str:
         )
         resp = client.chat.completions.create(
             model=settings.nebius_model,
-            messages=[{"role": "user", "content": prompt}],
+            # "detailed thinking off" disables Nemotron's reasoning mode so the
+            # answer lands in message.content — otherwise the model can spend the
+            # whole token budget thinking and return empty content.
+            messages=[
+                {"role": "system", "content": "detailed thinking off"},
+                {"role": "user", "content": prompt},
+            ],
             temperature=0.2,
-            max_tokens=220,
+            max_tokens=512,   # headroom: Nemotron may still 'think' briefly even with thinking off
         )
         text = (resp.choices[0].message.content or "").strip()
         return text or _template(facts)

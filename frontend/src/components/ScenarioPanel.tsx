@@ -14,6 +14,15 @@ import type { Plan, Project, ReplanResult } from "../types";
 import type { ReplanInput } from "../api";
 import "./ScenarioPanel.css";
 
+// Compact USD formatter: $11.0M, $115k, $500.
+function fmtUsd(n: number): string {
+  if (!Number.isFinite(n)) return "$0";
+  const a = Math.abs(n);
+  if (a >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (a >= 1_000) return `$${(n / 1_000).toFixed(0)}k`;
+  return `$${n}`;
+}
+
 export interface ScenarioPanelProps {
   project: Project | null;
   plan: Plan | null;
@@ -164,11 +173,11 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
               <span className="metric-box-title">Total Cost</span>
               <div className="metric-box-values">
                 <span className="metric-old-val">
-                  ${(replan.old_plan.total_cost_usd / 1000).toFixed(0)}k
+                  {fmtUsd(replan.old_plan.total_cost_usd)}
                 </span>
                 <span className="metric-arrow">→</span>
                 <span className="metric-new-val">
-                  ${(replan.new_plan.total_cost_usd / 1000).toFixed(0)}k
+                  {fmtUsd(replan.new_plan.total_cost_usd)}
                 </span>
               </div>
               <span
@@ -357,7 +366,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
                 <div className="baseline-stat-item">
                   <span className="baseline-stat-label">Total Cost</span>
                   <span className="baseline-stat-val">
-                    ${(plan.total_cost_usd / 1000).toFixed(0)}k
+                    {fmtUsd(plan.total_cost_usd)}
                   </span>
                 </div>
                 <div className="baseline-stat-item">

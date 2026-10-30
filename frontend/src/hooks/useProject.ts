@@ -39,13 +39,15 @@ export function useProject(): UseProjectReturn {
   useEffect(() => {
     let ignore = false;
     fetchProject()
-      .then((data) => {
-        if (!ignore) {
-          setProject(data);
-          if (data.plan) {
-            setPlan(data.plan);
-          }
-          setIsDemoMode(false);
+      .then(async (data) => {
+        if (ignore) return;
+        setProject(data);
+        setIsDemoMode(false);
+        // /project returns plan=null (the solver computes it separately), so pull
+        // the real baseline schedule from /plan unless it's already included.
+        const baseline = data.plan ?? (await fetchPlan().catch(() => null));
+        if (!ignore && baseline) {
+          setPlan(baseline);
         }
       })
       .catch((err) => {

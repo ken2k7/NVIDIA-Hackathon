@@ -185,6 +185,16 @@ def solve(district: District, blocked_windows=None) -> Plan:
     coord = _solve_once(district, allow_cotrench=True, blocked_windows=blocked_windows)
     coord_closure, _ = _closure(district, coord.starts, coord.ends)
 
+    # A disruption (road closure / emergency) shuts its street for the window even
+    # though no scheduled project runs then — count that toward closure days so a
+    # replan shows real public-disruption impact.
+    tw = {seg.id: seg.traffic_weight for seg in district.segments}
+    for (seg_id, w_start, w_end) in (blocked_windows or []):
+        if seg_id is not None:
+            coord_closure += int(max(0, w_end - w_start) * tw.get(seg_id, 0))
+
+    total_cost = sum(p.cost_estimate_usd for p in district.projects)
+
     # Road-closure days saved by sharing a trench: for each co-trenched pair, the
     # shorter dig's days no longer close the street separately.
     dur = {p.id: p.duration_days for p in district.projects}
@@ -218,6 +228,7 @@ def solve(district: District, blocked_windows=None) -> Plan:
         status="draft",
         tasks=tasks,
         total_days=coord.makespan,
+        total_cost_usd=total_cost,
         closure_days=coord_closure,
         synergy_captured_usd=coord.synergy_captured,
         shift_penalty_usd=coord.shift_penalty,
