@@ -42,12 +42,12 @@
 | 0:46–1:00 | L5 [B] | **SR-03** co-trench + **growing-city** micro-metaphor | **$115,000 saved** | two trenches animate into one; number odometer-rolls up |
 | 1:00–1:12 | L6 [K] | **SR-04** type the incident | — | real typing, no overlay |
 | 1:12–1:22 | L7 [K] | **SR-05** diagnose + **explainer-diagram** pipeline | **Nemotron · Token Factory** | packet flows: situation → Nemotron → constraint → CP-SAT |
-| 1:22–1:32 | L8 [B] | **SR-06** cards | **+1,330 closure-days** | CLOSURE card rolls; red accent pin |
-| 1:32–1:40 | L8 [B] | **SR-09** before/after toggle | **$115k preserved** | bars morph Baseline→Proposed; green tick holds |
-| 1:40–1:50 | L9 [B] | **SR-07** Nemotron text | **Grounded in real numbers** | the 3 real figures lift off the paragraph and lock into place |
-| 1:50–1:58 | L10 [K] | **SR-08** approve | **Human approves** | green ripple; committed state holds 0.8 s |
+| 1:22–1:32 | L8 [B] | **SR-06** cards *(first part of merged clip)* | **+1,330 closure-days** | CLOSURE card rolls; red accent pin |
+| 1:32–1:40 | L8 [B] | **SR-08** before/after toggle | **$115k preserved** | bars morph Baseline→Proposed; green tick holds |
+| 1:40–1:50 | L9 [B] | **SR-06** Nemotron text *(latter part of merged clip)* | **Grounded in real numbers** | the 3 real figures lift off the paragraph and lock into place |
+| 1:50–1:58 | L10 [K] | **SR-07** approve | **Human approves** | green ripple; committed state holds 0.8 s |
 | 1:58–2:10 | L11 [K] | **explainer-diagram** three-pillar living diagram | **Solver → AI → Human** | each node lights on a 0.5 s beat, packet runs the chain |
-| 2:10–2:20 | L12 [B] | **HF-4** aerial city at dusk, lights coming on (or `growing-city`) + quick **SR-10** API flash | **It's real.** | the district "switches on" as coordination lands |
+| 2:10–2:20 | L12 [B] | **HF-4** aerial city at dusk, lights coming on (or `growing-city`) + quick **SR-09** API flash | **It's real.** | the district "switches on" as coordination lands |
 | 2:20–2:48 | L13 [B] | **swiss-kinetic** close + logo lockup | **Coordinate once. Dig once.** | stack logos resolve: NVIDIA Nemotron · Nebius Token Factory · OR-Tools; URL; final hold 1.5 s |
 
 ---

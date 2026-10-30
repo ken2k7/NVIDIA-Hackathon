@@ -59,20 +59,19 @@ DevTools (`⌘⌥I`) → device toolbar (`⌘⇧M`) → Responsive = **1920×108
 | **SR-01** | **Overview** | Hard-reload. Hold 1 s. Slowly glide the cursor left→right across the **header**, then down the **map**, then down to the **Gantt**. No clicks. | Header chips: `Segments: 6 · Work Packages: 11 · Dig-Once Savings: $115,000 · FastAPI Live` | 20 s |
 | **SR-02** | **Map detail** | On the **District Network Map**, scroll-zoom in one notch, slow pan; hover a colored street so a tooltip shows; let the **Right-of-Way Layers** legend sit in frame. | Colored segments + the legend (Closed / Co-Location Synergy / Active / None) | 14 s |
 | **SR-03** | **Co-trench payoff** | On the **Gantt**, hover the **"7th Ave Water Main"** row, then **"7th Ave Fiber Conduit"**, then rest the cursor on the **🔗 Co-Trench** badge for ~2 s. | The 🔗 Co-Trench badge **and** `Dig-Once Savings: $115,000` | 14 s |
-| **SR-10** | **It's real (API proof)** | New tab → `http://localhost:8000/docs` → expand **GET /plan** → click **Try it out → Execute** → slow-scroll the JSON response. | FastAPI Swagger page, the live JSON (`total_days`, `dig_once_savings_usd`) | 16 s |
+| **SR-09** | **It's real (API proof)** | New tab → `http://localhost:8000/docs` → expand **GET /plan** → click **Try it out → Execute** → slow-scroll the JSON response. | FastAPI Swagger page, the live JSON (`total_days`, `dig_once_savings_usd`) | 16 s |
 
-### 🎬 BHAVYA records — the live replan (6 clips, one continuous session)
+### 🎬 BHAVYA records — the live replan (5 clips, one continuous session)
 
-Record SR-04 → SR-08 as one smooth run first (backup), then grab clean individual takes.
+Record SR-04 → SR-07 as one smooth run first (backup), then grab clean individual takes.
 
 | ID | Clip | Exact actions | Must be in frame | Record len |
 |---|---|---|---|---|
 | **SR-04** | **Type the incident** | Click the **"Incident Dispatch / Situation Report"** textarea (pause on the click), then **type the scenario line slowly**, word by word. | The full typed sentence in the box | 16 s |
 | **SR-05** | **Diagnose + solve** | Click **"Diagnose with Nemotron & Re-Optimize"**. Hold still while it resolves. | `NEMOTRON AUTONOMOUS DIAGNOSIS: EMERGENCY` + `OR-Tools CP-SAT Solved` badge + map segment turning **red** | 12 s |
-| **SR-06** | **The metric cards** | Slowly move across the 4 cards, resting ~1.5 s on each. | `CLOSURE DAYS 10,924 → 12,254 · +1,330 road impact` **and** `DIG-ONCE $115k → $115k · synergy preserved` | 16 s |
-| **SR-07** | **Grounded AI text** | Rest the cursor; let the **"NVIDIA Nemotron Reasoning Synthesis"** paragraph be fully readable for ~4 s. | The full generated paragraph + the `Grounded Solver Facts` tag | 10 s |
-| **SR-08** | **Human approves** | Move to and click **"Approve & Commit Baseline"**; hold on the committed state. | The green Approve button → the status flip | 8 s |
-| **SR-09** | **Before vs after** | On the Gantt's **Scenario View** toggle, click **Baseline (Old)** → **Proposed (New)** → **Diff Overlay**, pausing ~1.5 s on each. | The toggle + the bars shifting between states | 14 s |
+| **SR-06** | **Cards + grounded AI text** *(merged)* | Slowly move across the 4 metric cards, resting ~1.5 s on each, then drift down and rest the cursor so the **"NVIDIA Nemotron Reasoning Synthesis"** paragraph is fully readable for ~4 s. | `CLOSURE DAYS 10,924 → 12,254 · +1,330 road impact` **and** `DIG-ONCE $115k → $115k · synergy preserved` **and** the full generated paragraph + the `Grounded Solver Facts` tag | 24 s |
+| **SR-07** | **Human approves** | Move to and click **"Approve & Commit Baseline"**; hold on the committed state. | The green Approve button → the status flip | 8 s |
+| **SR-08** | **Before vs after** | On the Gantt's **Scenario View** toggle, click **Baseline (Old)** → **Proposed (New)** → **Diff Overlay**, pausing ~1.5 s on each. | The toggle + the bars shifting between states | 14 s |
 
 **Total raw ≈ 2:20 → used footage ≈ 90 s.** Plenty.
 

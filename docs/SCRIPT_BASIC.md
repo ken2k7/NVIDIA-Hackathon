@@ -40,12 +40,12 @@ Read it like you built it and you're proud of it — conversational, unhurried, 
 | 0:46–1:00 | L5 [B] | **SR-03** co-trench + **callout** | **$115,000 saved** | number counts up (odometer, 0.6 s) as cursor hits the 🔗 badge |
 | 1:00–1:12 | L6 [K] | **SR-04** type scenario | *(none — let the typing read)* | real-time typing; no overlay competing with it |
 | 1:12–1:22 | L7 [K] | **SR-05** diagnose→solve + **lower-third** | **Nemotron · Token Factory** | overlay appears the instant the EMERGENCY badge lands |
-| 1:22–1:30 | L8 [B] | **SR-06** cards | **+1,330 closure-days** | callout pins to the CLOSURE card as it rolls up; red accent |
-| 1:30–1:38 | L8 [B] | **SR-09** before/after toggle | **$115k preserved** | green tick on the DIG-ONCE value; bars shift Baseline→Proposed |
-| 1:38–1:48 | L9 [B] | **SR-07** Nemotron paragraph + **lower-third** | **Grounded in real numbers** | the 3 real figures (241 / 12,254 / $115k) briefly underline |
-| 1:48–1:56 | L10 [K] | **SR-08** approve | **Human approves** | green ripple on click; hold the committed state 0.8 s |
+| 1:22–1:30 | L8 [B] | **SR-06** cards *(first part of merged clip)* | **+1,330 closure-days** | callout pins to the CLOSURE card as it rolls up; red accent |
+| 1:30–1:38 | L8 [B] | **SR-08** before/after toggle | **$115k preserved** | green tick on the DIG-ONCE value; bars shift Baseline→Proposed |
+| 1:38–1:48 | L9 [B] | **SR-06** Nemotron paragraph *(latter part of merged clip)* + **lower-third** | **Grounded in real numbers** | the 3 real figures (241 / 12,254 / $115k) briefly underline |
+| 1:48–1:56 | L10 [K] | **SR-07** approve | **Human approves** | green ripple on click; hold the committed state 0.8 s |
 | 1:56–2:08 | L11 [K] | **P3 — three pillars** (`midnight-grid`) | **Solver decides → AI explains → Human approves** | each label slides in on a 0.5 s beat; one blue accent |
-| 2:08–2:16 | L12 [B] | **SR-10** /docs API proof *(quick)* | **It's real.** | 1.5 s scroll of live JSON; proves nothing's faked |
+| 2:08–2:16 | L12 [B] | **SR-09** /docs API proof *(quick)* | **It's real.** | 1.5 s scroll of live JSON; proves nothing's faked |
 | 2:16–2:42 | L13 [B] | **P4 — CLOSE card** (`swiss-grid`) | **Coordinate once. Dig once.** | logo settles; small line: repo + demo URL; final hold 1.5 s |
 
 ---
