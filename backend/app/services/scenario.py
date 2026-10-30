@@ -61,7 +61,23 @@ def reject(plan_id: str) -> Optional[Plan]:
 
 # ---- disruption -> solver inputs ---------------------------------------------
 
-def _disruption_to_scenario(district: District, d: Disruption):
+def _segment_work_start(district: District, old_plan: Optional[Plan], segment_id: str) -> int:
+    """Earliest baseline start-day of any work planned on `segment_id` (0 if none).
+
+    An emergency closes a corridor while its planned work is actually happening,
+    not at day 0 when that work may be a month away. Anchoring the closure to the
+    segment's active window is what makes the re-plan bite: the solver must
+    re-sequence the colliding packages instead of leaving a far-off schedule
+    untouched. Falls back to day 0 when we have no baseline to anchor against.
+    """
+    if old_plan is None:
+        return 0
+    seg_projects = {p.id for p in district.projects if p.segment_id == segment_id}
+    starts = [t.start_day for t in old_plan.tasks if t.project_id in seg_projects]
+    return min(starts) if starts else 0
+
+
+def _disruption_to_scenario(district: District, d: Disruption, old_plan: Optional[Plan] = None):
     """Return (modified_district, blocked_windows) for a disruption.
 
     blocked_windows is a list of (segment_id | None, from_day, to_day) spans
@@ -79,14 +95,15 @@ def _disruption_to_scenario(district: District, d: Disruption):
         lost = round((d.to_day - d.from_day) * d.efficiency_loss_pct / 100)
         windows.append((None, d.from_day, d.from_day + lost))
     elif isinstance(d, Emergency):
-        windows.append((d.segment_id, 0, d.duration_days))
+        anchor = _segment_work_start(district, old_plan, d.segment_id)
+        windows.append((d.segment_id, anchor, anchor + d.duration_days))
     return modified, windows
 
 
 def replan(district: District, disruption: Disruption, old_plan: Optional[Plan] = None) -> ReplanResult:
     if old_plan is None:
         old_plan = get_current_plan(district)
-    modified, windows = _disruption_to_scenario(district, disruption)
+    modified, windows = _disruption_to_scenario(district, disruption, old_plan)
     try:
         new_plan = solve(modified, blocked_windows=windows)
     except ValueError:
