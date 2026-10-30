@@ -194,11 +194,11 @@ export function createSimulatedReplan(
 
   const explanation =
     disruption.kind === "road_closure"
-      ? `OR-Tools CP-SAT re-sequenced work around the ${disruption.days}-day closure on Segment ${disruption.segment_id}. Co-trenching between Water Main (PRJ_01) and Fiber (PRJ_02) was preserved with synchronized excavation windows, increasing dig-once savings to $${newPlan.dig_once_savings_usd.toLocaleString()} while minimizing overall corridor downtime.`
+      ? `OR-Tools CP-SAT re-sequenced work around the ${disruption.days}-day closure on Segment ${disruption.segment_id}. Co-trenching between Water Main (PRJ_01) and Fiber (PRJ_02) was preserved with synchronized excavation windows, increasing dig-once savings to $${newPlan.dig_once_savings_usd.toLocaleString("en-US")} while minimizing overall corridor downtime.`
       : disruption.kind === "weather"
       ? `Severe rain constraint (Days ${disruption.from_day}–${disruption.to_day}) deferred trench excavation on non-stabilized road beds. CP-SAT redistributed crew assignments to indoor utility telemetry, shifting downstream paving to Day 30.`
       : disruption.kind === "budget_change"
-      ? `Under the updated $${disruption.new_cap_usd.toLocaleString()} budget limit, the solver locked co-location synergy windows early to maximize trench-sharing capital reductions before secondary surface work.`
+      ? `Under the updated $${disruption.new_cap_usd.toLocaleString("en-US")} budget limit, the solver locked co-location synergy windows early to maximize trench-sharing capital reductions before secondary surface work.`
       : `Emergency response protocol accommodated high-priority corridor access while rescheduling non-critical work packages into adjacent non-conflicting time windows.`;
 
   return {

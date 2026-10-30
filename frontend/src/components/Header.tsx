@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
         {plan && (
           <div className="metric-chip highlight">
             <span className="metric-label">Dig-Once Savings:</span>
-            <span className="metric-value">${plan.dig_once_savings_usd.toLocaleString()}</span>
+            <span className="metric-value">${plan.dig_once_savings_usd.toLocaleString("en-US")}</span>
           </div>
         )}
       </div>

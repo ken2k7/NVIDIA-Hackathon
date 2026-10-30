@@ -137,7 +137,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             <div className="gantt-badge synergy">
               <Zap size={14} />
               <span>
-                Dig-Once Savings: ${displayedPlan.dig_once_savings_usd.toLocaleString()}
+                Dig-Once Savings: ${displayedPlan.dig_once_savings_usd.toLocaleString("en-US")}
               </span>
             </div>
           )}
@@ -409,7 +409,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
               <div className="inspector-metric-card">
                 <span className="inspector-metric-label">Direct Cost</span>
                 <span className="inspector-metric-val">
-                  ${selectedPackage.cost_usd.toLocaleString()}
+                  ${selectedPackage.cost_usd.toLocaleString("en-US")}
                 </span>
               </div>
             )}

@@ -138,7 +138,7 @@ export const ScenarioPanel: React.FC<ScenarioPanelProps> = ({
                 {replan.disruption.kind === "weather" &&
                   `Precipitation constraint applied (Days ${replan.disruption.from_day}–${replan.disruption.to_day})`}
                 {replan.disruption.kind === "budget_change" &&
-                  `Capital ceiling capped at $${replan.disruption.new_cap_usd.toLocaleString()}`}
+                  `Capital ceiling capped at $${replan.disruption.new_cap_usd.toLocaleString("en-US")}`}
                 {replan.disruption.kind === "emergency" &&
                   `Priority ${replan.disruption.priority} clearance on Segment ${replan.disruption.segment_id}`}
               </span>
